@@ -10,9 +10,11 @@ export async function POST(req: NextRequest) {
 
   const name = body.name;
   const description = body.description;
+  const indexName = body.indexName;
+  const indexHost = body.indexHost;
 
   try {
-    const namespace = pc.index("brainostrial", "https://brainostrial-4xs8jys.svc.aped-4627-b74a.pinecone.io").namespace(`${name}`);
+    const namespace = pc.index(indexName, indexHost).namespace(`${name}`);
     await namespace.upsertRecords([
       {
           "_id": "rec1",
