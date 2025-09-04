@@ -1,0 +1,1 @@
+// For AI Response for general use cases
