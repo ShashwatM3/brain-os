@@ -9,8 +9,8 @@ import { toast } from 'sonner'
 function Page() {
   // --------------- CREATING A CLOUD -------------------
   const [createCloud, setCreateCloud] = useState(false);
-  const [createCloudName, setCreateCloudName] = useState("AI Articles");
-  const [createCloudDesciption, setCreateCloudDescription] = useState("Latest Research and publications in LLM Research");
+  const [createCloudName, setCreateCloudName] = useState("");
+  const [createCloudDesciption, setCreateCloudDescription] = useState("");
   const [loadingCreateCloud, setLoadingCreateCloud] = useState(false);
   //  Sample Cloud Name — AI Articles
   //  Sample Cloud Description — Latest Research and publications in LLM Research
