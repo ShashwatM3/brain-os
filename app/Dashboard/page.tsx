@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import TailwindSpinner from '@/components/ui/tailwindspinner'
 import { toast } from 'sonner'
-import { Cloud, Delete, Edit, Link, Trash } from 'lucide-react'
+import { Cloud, Delete, Edit, Link, RefreshCcw, Trash } from 'lucide-react'
 import CloudPage from "./(dashboard-comps)/CloudPage"
 
 function Page() {
@@ -193,13 +193,21 @@ function Page() {
     }
   }
 
+  function refreshTotal() {
+    setCloudsRefresh(true)
+    setTimeout(function() {
+      alert("Hello");
+      loadCloudData();
+    }, 3000);
+  }
+
   useEffect(() => {
     loadCloudData()
   }, [cloudsRefresh])
 
   return (
     Object.keys(cloudOpen).length>0 ? (
-      <CloudPage data={cloudOpen.data} name={cloudOpen.name} onBack={() => setCloudOpen({})} />
+      <CloudPage refreshCloudData={refreshTotal} data={cloudOpen.data} name={cloudOpen.name} onBack={() => setCloudOpen({})} />
     ):(
       <div className='p-5 pt-10'>
         {/* CREATING CLOUDS */}
@@ -209,10 +217,7 @@ function Page() {
           ):(
             <div className='flex items-center justify-between'>
               <Button onClick={() => setCreateCloud(true)}>Create cloud</Button>
-              <Button variant={'secondary'} onClick={() => {
-                setCloudsRefresh(true)
-                loadCloudData();
-              }}>Refresh cloud data</Button>
+              <Button variant={'secondary'} onClick={refreshTotal}><RefreshCcw/> Refresh</Button>
             </div>
           )}
 
