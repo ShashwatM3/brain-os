@@ -27,8 +27,8 @@ export default function Home() {
               </TooltipContent>
             </Tooltip>
             to your{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              clouds
+            <code className="bg-black/[.40] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
+              2nd brain
             </code>
           </li>
           <li className="tracking-[-.01em]">
