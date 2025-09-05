@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     await namespace.upsertRecords([
       {
           "_id": "rec1",
-          "text": `The name of this current searchable namespace is ${name} and it's description is: ${description} `,
+          "text": `The name of this current searchable cloud is ${name} and it's description is: ${description} `,
           "category": "Description", 
       },
     ]);

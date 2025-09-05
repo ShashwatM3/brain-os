@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Audiowide&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
@@ -128,4 +129,41 @@
   font-weight: 400;
   font-size: 50px;
   padding-bottom: 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0
+  } to {
+    opacity: 1
+  }
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+#fadeIn {
+  animation: fadeIn 1s ease-in-out;
+}
+
+#fadeInOut {
+  animation: fadeInOut 1.5s ease-in-out infinite;
+}
+
+#grotesk-font {
+  font-family: "Space Grotesk", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
