@@ -44,7 +44,8 @@ function CloudPage() {
   // ------------------------------------------------------------------------
   // ---------------------Handling chat input-----------------------------
   // ------------------------------------------------------------------------
-  const [userInputOverall, setUserInputOverall] = useState("")
+  const [userInputOverall, setUserInputOverall] = useState("");
+  const [messages, setMessages] = useState([]);
   // ------------------------------------------------------------------------
   // ------------------------------------------------------------------------
 
@@ -275,15 +276,39 @@ function CloudPage() {
       .catch(error => console.error("Failed to extract text from pdf"))
   }
   
-  function askQuestion() {
-    
+  async function askQuestion() {
+    console.log("Messages, ", messages)
+    const res = await fetch('/api/ai/rag', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        inputText: `Convo until now: ${JSON.stringify(messages)} \n\n. User's query: ${userInputOverall}`,
+      }),
+    });
+
+    if (!res.ok) {
+      console.error('Request failed');
+      return;
+    }
+  
+    const data = await res.json();
+    console.log(data);
+    if (data && data.response && data.response.length>0) {
+      setMessages(prevMessages => ([
+        ...prevMessages,
+        {"role": "user", "content": userInputOverall},
+        {"role": "assistant", "content": data.response},
+      ]))
+    }
   }
 
   return (
     <>
     <div className={`cloud-page-main p-8 pt-13`}>
       {/* Setting BLUR Overlay */}
-      {blur && (
+      {messages.length > 0 && userInputOverall.length>0 && (
           <div className="absolute inset-0 bg-black/30 backdrop-blur-md pointer-events-none"></div>
       )}
 
@@ -294,7 +319,7 @@ function CloudPage() {
             <Cloudy className='h-10 w-10'/>
             <span>Your Cloud: <span className='font-bold'>{name}</span></span>
           </h1>
-          <h3 className='w-[45%] mb-5 opacity-[70%]'>{description}</h3>
+          {/* <h3 className='w-[45%] mb-5 opacity-[70%]'>{description}</h3> */}
           <div className='flex items-center gap-2'>
             <Button variant={'outline'}>Edit details</Button>
             <Button className='cursor-pointer' onClick={onBack} variant={'secondary'}>Back to Clouds Home <Forward/></Button>
@@ -394,22 +419,48 @@ function CloudPage() {
 
     {/* USER INPUT */}
     {!loading && (
-      <div className='chatInput fixed flex items-center justify-center w-full gap-2'>
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-2xl pl-4">
-          <div className={`flex items-center transition duration-400 bg-transparent hover:bg-neutral-900 border border-neutral-700 hover:border-none rounded-lg pl-4 pr-2 py-2`}>
-            <textarea
-              rows="1"
-              placeholder="Ask anything about the info in your cloud..."
-              className="flex-1 bg-transparent text-neutral-200 placeholder-neutral-500 focus:outline-none resize-none text-base leading-relaxed px-2 py-1"
-              value={userInputOverall}
-              id="grotesk-font"
-              onChange={(e) => setUserInputOverall(e.target.value)}
-            ></textarea>
-            <button
-              className="ml-3 p-2 rounded-lg h-full bg-indigo-600 hover:bg-indigo-500 transition-colors"
-            >
-              <SendHorizonal onClick={askQuestion} className='h-5 w-auto'/>
-            </button>
+      <div className='fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-2xl pl-4 z-[50]'>
+        <div className={`flex items-center transition duration-400 bg-transparent hover:bg-neutral-900 border border-neutral-700 hover:border-none rounded-lg pl-4 pr-2 py-2`}>
+          <textarea
+            rows="1"
+            placeholder="Ask anything about the info in your cloud..."
+            className="flex-1 bg-transparent text-neutral-200 placeholder-neutral-500 focus:outline-none resize-none text-base leading-relaxed px-2 py-1"
+            value={userInputOverall}
+            id="grotesk-font"
+            onChange={(e) => setUserInputOverall(e.target.value)}
+          ></textarea>
+          <button
+            className="ml-3 p-2 rounded-lg h-full bg-indigo-600 hover:bg-indigo-500 transition-colors"
+          >
+            <SendHorizonal onClick={askQuestion} className='h-5 w-auto'/>
+          </button>
+        </div>
+      </div>
+    )}
+
+    {!loading && messages.length>0 && userInputOverall.length>0 && (
+      <div className='fixed bottom-28 left-1/2 -translate-x-1/2 z-[40] min-w-[30vw]'>
+        <div className="rounded-lg border bg-popover p-6 text-popover-foreground shadow-lg">      
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold">Your Chat</h2>
+            <p className="text-sm text-muted-foreground">Messages with your cloud: {name}</p>
+          </div>
+          <div className="mb-2">
+            <div className='p-5 border rounded-lg flex items-start flex-col gap-5 max-h-[30vh] overflow-y-scroll w-full pt-7 pb-9'>
+              {messages.map((message, index) => (
+                message.role == "user" ? (
+                  <div key={index} className='flex items-center gap-2'>
+                    <h1>You said: </h1>
+                    <h1 className='p-1 px-3 border rounded-lg'>{message.content}</h1>
+                  </div>
+                ):(
+                  <div key={index} className='flex items-center gap-4'>
+                    <h1 className='whitespace-nowrap'>AI said: </h1>
+                    <h1 className='p-2 px-5 border rounded-lg border-blue-900'>{message.content}</h1>
+                  </div>
+                )
+              ))}
+            </div>
           </div>
         </div>
       </div>
