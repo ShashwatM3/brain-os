@@ -1,0 +1,35 @@
+CloudPage component — WHEN IT LOADS
+
+🎯 [CloudPage] Component initialized
+📊 [CloudPage] Store values - currentCloud: [] currentCloudName: [cloud-name]
+🔄 [CloudPage] useEffect triggered
+📊 [CloudPage] useEffect - currentCloud: [] currentCloudName: [cloud-name]
+🔄 [CloudPage] useEffect - Cloud name available but no data, calling refreshCloudData
+
+
+DATA LOADING PROCESS 
+
+🔄 [CloudPage] refreshCloudData called with namespace: [cloud-name]
+⏳ [CloudPage] Setting loading state to true
+🔍 [CloudPage] Starting API call to fetch-record-ids
+📋 [CloudPage] fetch-record-ids response: [response-data]
+✅ [CloudPage] Found [X] record IDs: [array-of-ids]
+🔍 [CloudPage] Starting API call to fetch-records
+📊 [CloudPage] fetch-records response: [response-data]
+✅ [CloudPage] Successfully loaded [X] records
+⏳ [CloudPage] Setting loading state to false
+💾 [CloudPage] Setting local data state
+🏪 [CloudPage] Updating store with currentCloud data
+🏪 [Store] setCurrentCloud called with: [array-of-records]
+🏪 [CloudPage] Updating store with currentCloudName: [cloud-name]
+🏪 [Store] setCurrentCloudName called with: [cloud-name]
+🎉 [CloudPage] Data loading completed successfully
+
+COMPONENT SETUP — After data LOADS
+
+🔄 [CloudPage] useEffect triggered
+📊 [CloudPage] useEffect - currentCloud: [array] currentCloudName: [cloud-name]
+✅ [CloudPage] useEffect - Data available, setting up component
+📝 [CloudPage] useEffect - Set name to: [cloud-name]
+📁 [CloudPage] useEffect - Set mediaNames: [array-of-media-names]
+📄 [CloudPage] useEffect - Set description from vector

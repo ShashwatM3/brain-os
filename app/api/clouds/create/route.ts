@@ -4,14 +4,27 @@ import pc from "@/lib/pinecone";
 import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = "force-dynamic";
+export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
 
-  const name = body.name;
-  const description = body.description;
-  const indexName = body.indexName;
-  const indexHost = body.indexHost;
+  const name = (body?.name ?? '').toString().trim();
+  const description = (body?.description ?? '').toString();
+  const indexName = (body?.indexName ?? '').toString().trim();
+  let indexHost = (body?.indexHost ?? '').toString().trim();
+
+  if (!name || !indexName || !indexHost) {
+    return NextResponse.json(
+      { error: "Missing required fields: name, indexName, indexHost" },
+      { status: 400 }
+    );
+  }
+
+  // Pinecone v2 requires full protocol host, ensure https is present
+  if (!/^https?:\/\//i.test(indexHost)) {
+    indexHost = `https://${indexHost}`;
+  }
 
   try {
     const namespace = pc.index(indexName, indexHost).namespace(`${name}`);
