@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
 
     const index = pc.index(indexName, indexHost).namespace(`${name}`);
 
-    let allVectors: any = [];
+    const allVectors: any = [];
     let paginationToken = undefined;
   
     while (true) {

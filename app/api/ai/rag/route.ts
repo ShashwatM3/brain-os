@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { inputText, indexName, indexHost, cloudName } = body;
 
-    let selectedModel = openai("gpt-4o-mini");
+    const selectedModel = openai("gpt-4o-mini");
     const prompt = `
 You are the first step in a Retrieval-Augmented Generation (RAG) system.
 
@@ -86,7 +86,8 @@ User's question: ${inputText}
     let result_context = "";
     if (response?.result.hits?.length) {
       response.result.hits.forEach((hit) => {
-        result_context += `${hit.fields.text}\n\n`;
+        const fields: any = hit.fields
+        result_context += `${fields.text}\n\n`;
       });
     }
 
