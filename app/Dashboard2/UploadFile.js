@@ -66,13 +66,11 @@ function UploadFile() {
   }
 
   async function addDocuments() {
-    const ids = Array.from({ length: chunks.length }, (_, i) => (i + 1).toString());
-    const metadatas = Array.from({ length: chunks.length }, () => ({ category: "technology" }));
-
+    toast.info("Adding to your cloud....")
     console.log("--------------------")
-    console.log(ids)
     console.log(chunks)
-    console.log(metadatas)
+    console.log(currentMediaDetails);
+    console.log("--------------------")
 
     const response = await fetch("/api/chroma/add", {
       method: "POST",
@@ -82,12 +80,14 @@ function UploadFile() {
       body: JSON.stringify({
         ids: ids,
         documents: chunks,
-        metadatas: metadatas
+        filename: currentMediaDetails.name
       }),
     });
   
     const data = await response.json();
-    console.log("Response:", data);
+    if (data.response == "success") {
+      toast.success("Successfully added")
+    }
   }
 
   return (

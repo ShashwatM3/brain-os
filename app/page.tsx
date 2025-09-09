@@ -35,7 +35,7 @@ export default function Home() {
             Search across your brain 🧠
           </li>
         </ol>
-        <Button variant={'outline'} onClick={() => router.push("/Dashboard2")}>Go to dashboard</Button>
+        <Button variant={'outline'} onClick={() => router.push("/Dashboard")}>Go to dashboard</Button>
       </main>
       <div className="fixed bottom-10 right-10">
         <h1 className="text-neutral-500 hover:text-neutral-300 transition-all cursor-pointer border-b hover:border-neutral-500 pb-1 text-sm">Contact the Founder</h1>

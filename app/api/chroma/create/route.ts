@@ -1,4 +1,4 @@
-// For adding to collection
+// For creating a collection
 
 import client from '@/lib/chroma';
 import { NextRequest, NextResponse } from 'next/server';
@@ -8,11 +8,16 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const documents = body.documents;
-    const filename = body.filename;
 
-    const ids = Array.from({ length: documents.length }, (_, i) => (i + 1).toString());
-    const metadatas = Array.from({ length: documents.length }, () => ({ file_name: `${filename}` }));
+    const name = body.name;
+    const description = body.description;
+
+    const ids = [`Cloud_${name}_DESCRIPTION`];
+    const documents = [`Cloud: ${name}. Description: ${description}`];
+
+    const metadatas = [
+      {"cloud": name}
+    ]
 
     const collection = await client.getOrCreateCollection({
       name: 'myCollection',
