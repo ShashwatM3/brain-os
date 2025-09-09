@@ -1,15 +1,26 @@
 import { Pinecone } from '@pinecone-database/pinecone';
 
-const apiKey = process.env.PINECONE_API_KEY;
+let cachedClient: Pinecone | null = null;
 
-if (!apiKey || apiKey.trim().length === 0) {
-  // Fail fast with a clear error if the API key is missing
-  throw new Error('Pinecone API key is missing. Set PINECONE_API_KEY in your environment.');
+function getPineconeClient(): Pinecone {
+  if (cachedClient) return cachedClient;
+
+  const apiKey = process.env.PINECONE_API_KEY;
+  if (!apiKey || apiKey.trim().length === 0) {
+    // Throw only when actually trying to use the client
+    throw new Error('Pinecone API key is missing. Set PINECONE_API_KEY in your environment.');
+  }
+  cachedClient = new Pinecone({ apiKey });
+  return cachedClient;
 }
 
-const pc = new Pinecone({
-  apiKey
+// Lazy proxy so existing imports like `pc.index(...)` keep working
+const pc = new Proxy({} as Pinecone, {
+  get(_target, prop) {
+    const client = getPineconeClient() as any;
+    return client[prop as keyof Pinecone];
+  },
 });
 
-// const index = pc.index('quickstart');
-export default pc
+export default pc;
+export { getPineconeClient };
