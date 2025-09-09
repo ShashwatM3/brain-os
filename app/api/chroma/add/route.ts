@@ -7,13 +7,34 @@ interface AddDataRequest {
   metadatas: Metadata[];
 }
 
-const chromaClient = new CloudClient();
-
+let chromaClient: CloudClient | null = null;
 let myCollection: Collection | null = null;
+
+function getChromaClient(): CloudClient {
+  if (chromaClient) return chromaClient;
+
+  const apiKey = process.env.CHROMA_API_KEY;
+  const tenant = process.env.CHROMA_TENANT;
+  const database = process.env.CHROMA_DATABASE;
+
+  if (!apiKey) {
+    throw new Error("CHROMA_API_KEY is missing. Set it in environment variables.");
+  }
+  if (!tenant) {
+    throw new Error("CHROMA_TENANT is missing. Set it in environment variables.");
+  }
+  if (!database) {
+    throw new Error("CHROMA_DATABASE is missing. Set it in environment variables.");
+  }
+
+  chromaClient = new CloudClient({ apiKey, tenant, database });
+  return chromaClient;
+}
 
 const getMyCollection = async () => {
   if (!myCollection) {
-    myCollection = await chromaClient.getOrCreateCollection({
+    const client = getChromaClient();
+    myCollection = await client.getOrCreateCollection({
       name: "myCollection",
     });
   }
@@ -37,9 +58,9 @@ export async function POST(request: NextRequest) {
       data,
     });
   } catch (error) {
-    console.error(error);
+    console.error("/api/chroma/add error:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to add data" },
+      { success: false, message: (error as any)?.message ?? "Failed to add data" },
       { status: 500 },
     );
   }
