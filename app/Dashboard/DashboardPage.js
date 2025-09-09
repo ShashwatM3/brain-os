@@ -95,8 +95,13 @@ function DashboardPage() {
       });
     
       const data = await res.json();
-      const cloudNamesCounts = countFieldOccurrences(data.response.metadatas)
-      setClouds(cloudNamesCounts)
+      if (data.response && data.response.metadatas) {
+        const cloudNamesCounts = countFieldOccurrences(data.response.metadatas)
+      } else {
+        console.log(data)
+      }
+      
+      // setClouds(cloudNamesCounts)
     } catch (err) {
       console.error("Error sending POST request:", err);
     }
