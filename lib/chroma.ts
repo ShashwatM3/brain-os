@@ -9,6 +9,11 @@ export function getChromaClient(): CloudClient {
   const database = process.env.CHROMA_DATABASE;
   const apiKey = process.env.CHROMA_API_KEY;
 
+  console.log("🔍 [Chroma] Environment check:");
+  console.log("🔍 [Chroma] CHROMA_API_KEY:", apiKey ? `${apiKey.substring(0, 10)}...` : "MISSING");
+  console.log("🔍 [Chroma] CHROMA_TENANT:", tenant ? `${tenant.substring(0, 10)}...` : "MISSING");
+  console.log("🔍 [Chroma] CHROMA_DATABASE:", database || "MISSING");
+
   if (!apiKey) {
     throw new Error("CHROMA_API_KEY is missing. Set it in environment variables.");
   }
