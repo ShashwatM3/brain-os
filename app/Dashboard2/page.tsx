@@ -1,10 +1,10 @@
 import React from 'react'
-import DashboardPage from "./DashboardPage"
+import UploadFile from './UploadFile'
 
 function Page() {
   return (
     <div>
-      <DashboardPage/>
+      <UploadFile/>
     </div>
   )
 }

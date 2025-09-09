@@ -37,6 +37,9 @@ export default function Home() {
         </ol>
         <Button variant={'outline'} onClick={() => router.push("/Dashboard")}>Go to dashboard</Button>
       </main>
+      <div className="fixed bottom-10 right-10">
+        <h1 className="text-neutral-500 hover:text-neutral-300 transition-all cursor-pointer border-b hover:border-neutral-500 pb-1 text-sm">Contact the Founder</h1>
+      </div>
       {/* <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a
           className="flex items-center gap-2 hover:underline hover:underline-offset-4"

@@ -4,11 +4,21 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Cloud, Cloudy, Forward, MoveRight, MoveRightIcon, Plus, PointerIcon, Recycle, RefreshCcw, Send, SendHorizonal, Sparkle, SparkleIcon, Sparkles } from 'lucide-react';
+import { ArrowUpRightFromSquare, AtSign, Check, Cloud, Cloudy, Forward, MoveRight, MoveRightIcon, Plus, PointerIcon, Recycle, RefreshCcw, Send, SendHorizonal, SendIcon, Sparkle, SparkleIcon, Sparkles, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useRef } from 'react'
 import pdfToText from 'react-pdftotext'
 import { toast } from 'sonner';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import ReactMarkdown from 'react-markdown';
+import { Switch } from '@/components/ui/switch';
 
 function CloudPage() {
   console.log("🎯 [CloudPage] Component initialized");
@@ -46,6 +56,8 @@ function CloudPage() {
   // ------------------------------------------------------------------------
   const [userInputOverall, setUserInputOverall] = useState("");
   const [messages, setMessages] = useState([]);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [thinkHarder, setThinkHarder] = useState(false)
   // ------------------------------------------------------------------------
   // ------------------------------------------------------------------------
 
@@ -278,6 +290,10 @@ function CloudPage() {
   
   async function askQuestion() {
     console.log("Messages, ", messages)
+    setMessages(prevMessages => ([
+      ...prevMessages,
+      {"role": "user", "content": userInputOverall},
+    ]))
     const res = await fetch('/api/ai/rag', {
       method: 'POST',
       headers: {
@@ -285,6 +301,9 @@ function CloudPage() {
       },
       body: JSON.stringify({
         inputText: `Convo until now: ${JSON.stringify(messages)} \n\n. User's query: ${userInputOverall}`,
+        indexName: process.env.NEXT_PUBLIC_INDEX_NAME,
+        indexHost: process.env.NEXT_PUBLIC_INDEX_HOST,
+        cloudName: name
       }),
     });
 
@@ -298,7 +317,6 @@ function CloudPage() {
     if (data && data.response && data.response.length>0) {
       setMessages(prevMessages => ([
         ...prevMessages,
-        {"role": "user", "content": userInputOverall},
         {"role": "assistant", "content": data.response},
       ]))
     }
@@ -308,8 +326,8 @@ function CloudPage() {
     <>
     <div className={`cloud-page-main p-8 pt-13`}>
       {/* Setting BLUR Overlay */}
-      {messages.length > 0 && userInputOverall.length>0 && (
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-md pointer-events-none"></div>
+      {sheetOpen && (
+          <div className="absolute inset-0 bg-black/0 backdrop-blur-lg pointer-events-none"></div>
       )}
 
       {/* HEADER FOR INFORMATION */}
@@ -343,18 +361,20 @@ function CloudPage() {
       </div>
 
       {/* PLUS BUTTON — ADDING MEDIA */}
-      <div className='fixed bottom-10 right-10'>
-        <h1 className='p-4 rounded-lg cursor-pointer bg-white text-black' onClick={handleClick} variant={'secondary'}>
-          <Plus className='h-7 w-7'/>
-        </h1>
-        <input
-          type="file"
-          ref={hiddenFileInput}
-          onChange={handleChange}
-          accept="application/pdf"
-          style={{ display: 'none' }}
-        />
-      </div>
+      {!sheetOpen && (
+        <div className='fixed bottom-10 right-10'>
+          <h1 className='p-4 rounded-lg cursor-pointer bg-white text-black' onClick={handleClick} variant={'secondary'}>
+            <Plus className='h-7 w-7'/>
+          </h1>
+          <input
+            type="file"
+            ref={hiddenFileInput}
+            onChange={handleChange}
+            accept="application/pdf"
+            style={{ display: 'none' }}
+          />
+        </div>
+      )}
 
       {/* LOADING SCREEN */}
       <div className={`${loading ? "fixed top-0 left-0 w-screen h-screen flex items-center justify-center bg-black opacity-[40%]" : "hidden"}`}>
@@ -417,53 +437,86 @@ function CloudPage() {
       </div>
     </div>
 
-    {/* USER INPUT */}
-    {!loading && (
-      <div className='fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-2xl pl-4 z-[50]'>
-        <div className={`flex items-center transition duration-400 bg-transparent hover:bg-neutral-900 border border-neutral-700 hover:border-none rounded-lg pl-4 pr-2 py-2`}>
-          <textarea
-            rows="1"
-            placeholder="Ask anything about the info in your cloud..."
-            className="flex-1 bg-transparent text-neutral-200 placeholder-neutral-500 focus:outline-none resize-none text-base leading-relaxed px-2 py-1"
-            value={userInputOverall}
-            id="grotesk-font"
-            onChange={(e) => setUserInputOverall(e.target.value)}
-          ></textarea>
-          <button
-            className="ml-3 p-2 rounded-lg h-full bg-indigo-600 hover:bg-indigo-500 transition-colors"
-          >
-            <SendHorizonal onClick={askQuestion} className='h-5 w-auto'/>
-          </button>
-        </div>
-      </div>
-    )}
 
-    {!loading && messages.length>0 && userInputOverall.length>0 && (
-      <div className='fixed bottom-28 left-1/2 -translate-x-1/2 z-[40] min-w-[30vw]'>
-        <div className="rounded-lg border bg-popover p-6 text-popover-foreground shadow-lg">      
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold">Your Chat</h2>
-            <p className="text-sm text-muted-foreground">Messages with your cloud: {name}</p>
+    {!loading && (
+      <Sheet onOpenChange={setSheetOpen}>
+        <SheetTrigger asChild>
+          <div className='flex items-center justify-center w-screen fixed bottom-8 py-4'>
+            <Button variant={'outline'} className='hover:!text-blue-400 cursor-pointer'>Chat with your CLOUD <SendHorizonal/></Button>
           </div>
-          <div className="mb-2">
-            <div className='p-5 border rounded-lg flex items-start flex-col gap-5 max-h-[30vh] overflow-y-scroll w-full pt-7 pb-9'>
-              {messages.map((message, index) => (
-                message.role == "user" ? (
-                  <div key={index} className='flex items-center gap-2'>
-                    <h1>You said: </h1>
-                    <h1 className='p-1 px-3 border rounded-lg'>{message.content}</h1>
+        </SheetTrigger>
+        <SheetContent className='min-w-[100vw] p-5 bg-transparent'>
+          <SheetHeader>
+            <SheetTitle className='text-2xl mb-3'>Chat with your cloud</SheetTitle>
+            <SheetDescription className='text-xl'>
+              Ask and gather grounded valuable insights, and research across the media in your cloud, with no limitations
+            </SheetDescription>
+            <div className='w-full flex flex-col h-full relative'>
+              {!loading && messages.length>0 && (
+                <div className='rounded-lg'>
+                  <div className="rounded-lg p-6 pt-2 text-popover-foreground shadow-lg">      
+                    <div className="mb-4 flex items-center justify-between">
+                      {/* <h2 className="text-lg font-semibold">Your Chat</h2> */}
+                      <p className="text-sm text-muted-foreground">Messages with your cloud: {name}</p>
+                      <div className='flex items-center gap-3'>
+                        <Switch checked={thinkHarder} onCheckedChange={setThinkHarder}/>
+                        {thinkHarder ? (
+                          <h1 className='flex items-center gap-1'><Check className='text-green-500'/> Think Harder</h1>
+                          // <h1 className='flex items-center gap-1 text-green-400 font-bold'> Think Harder</h1>
+                        ):(
+                          <h1 className='flex items-center gap-1 text-neutral-500'>— Think Normal</h1>
+                        )}
+                      </div>
+                    </div>
+                    <div className='p-5 border rounded-lg h-[63vh] overflow-y-auto w-full flex flex-col gap-5 pt-7 pb-28'>
+                      {messages.map((message, index) => (
+                        message.role == "user" ? (
+                          <div key={index} className='flex items-center gap-2'>
+                            <h1>You said: </h1>
+                            <h1 className='p-1 px-3 border rounded-lg'>{message.content}</h1>
+                          </div>
+                        ):(
+                          <div key={index} className='flex items-center gap-4'>
+                            <h1 className='whitespace-nowrap'>AI said: </h1>
+                            <h1 className='p-2 px-5 border rounded-lg border-blue-900'>
+                              <ReactMarkdown>
+                              {message.content}
+                              </ReactMarkdown>
+                            </h1>
+                          </div>
+                        )
+                      ))}
+                    </div>
                   </div>
-                ):(
-                  <div key={index} className='flex items-center gap-4'>
-                    <h1 className='whitespace-nowrap'>AI said: </h1>
-                    <h1 className='p-2 px-5 border rounded-lg border-blue-900'>{message.content}</h1>
+                </div>
+              )}
+              {/* USER INPUT */}
+              {!loading && (
+                <div className='fixed bottom-10 w-full flex items-center justify-center mt-4'>
+                  <div className='w-[80%]'>
+                    <div className={`flex items-center transition duration-400 bg-transparent hover:bg-neutral-900 ${sheetOpen && ("!bg-neutral-900")}  hover:border-none rounded-lg pl-4 pr-2 py-2`}>
+                      <textarea
+                        rows="1"
+                        placeholder="Ask anything about the info in your cloud..."
+                        className="flex-1 bg-transparent text-neutral-200 placeholder-neutral-500 focus:outline-none resize-none text-base leading-relaxed px-2 py-1"
+                        value={userInputOverall}
+                        id="grotesk-font"
+                        onChange={(e) => setUserInputOverall(e.target.value)}
+                      ></textarea>
+                      <button
+                        onClick={askQuestion}
+                        className="ml-3 p-2 rounded-lg h-full bg-indigo-600 hover:bg-indigo-500 transition-colors cursor-pointer"
+                      >
+                        <SendHorizonal className='h-5 w-auto'/>
+                      </button>
+                    </div>
                   </div>
-                )
-              ))}
+                </div>
+              )}
             </div>
-          </div>
-        </div>
-      </div>
+          </SheetHeader>
+        </SheetContent>
+      </Sheet>
     )}
     </>
   )
