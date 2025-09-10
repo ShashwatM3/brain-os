@@ -25,13 +25,21 @@ function DashboardPage() {
   const [cloudsRefresh, setCloudsRefresh] = useState(false) // For REFRESHING DATA or INITIAL LOAD
   const [createCloudName, setCreateCloudName] = useState("");
   const [createCloudDesciption, setCreateCloudDescription] = useState("");
-  const [clouds, setClouds] = useState([])
+  const [clouds, setClouds] = useState([]);
+  
+  const router = useRouter()
 
   // Missing state variables
   const [loadingCloudData, setLoadingCloudData] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteCloudState, setDeleteCloudState] = useState(false);
   const [editCloudName, setEditCloudName] = useState("");
+
+  // Loading ZuStand Store Variables
+  const currentCloud = useCounterStore((state) => state.currentCloud)
+  const setCurrentCloud = useCounterStore((state) => state.setCurrentCloud);
+  const currentCloudName = useCounterStore((state) => state.currentCloudName)
+  const setCurrentCloudName = useCounterStore((state) => state.setCurrentCloudName);
 
   // ------------------------------FUNCTIONS-----------------------------------
   function refreshTotal() { // Function for refreshing everything (not resetting any values)
@@ -96,7 +104,8 @@ function DashboardPage() {
     
       const data = await res.json();
       if (data.response && data.response.metadatas) {
-        const cloudNamesCounts = countFieldOccurrences(data.response.metadatas)
+        const cloudNamesCounts = countFieldOccurrences(data.response.metadatas, "cloud")
+        setClouds(cloudNamesCounts)
       } else {
         console.log(data)
       }
@@ -108,8 +117,18 @@ function DashboardPage() {
   }
 
   // Empty placeholder functions
-  async function getAllVectors(cloudName) {
+  async function enterCloud(cloudName) {
+    console.log("🚀 [Dashboard] Starting enterCloud() for cloud:", cloudName);
+    setLoadingCloudData(true);
+    console.log("📝 [Dashboard] Setting loading state to true");
     
+    // Navigate immediately and set the cloud name
+    console.log("🏪 [Dashboard] Setting currentCloudName in store:", cloudName);
+    setCurrentCloudName(cloudName);
+    
+    console.log("🧭 [Dashboard] Navigating to /Dashboard/Cloud");
+    router.push("/Dashboard/Cloud");
+    console.log("✅ [Dashboard] Navigation initiated");
   }
 
   async function deleteNamespace(cloudName) {
@@ -125,9 +144,9 @@ function DashboardPage() {
   }, [cloudsRefresh])
 
   return(
-    <div className='dashboard-page-main'>
-      <h1>Welcome to your Dashboard</h1>
-      <h3>Here, you can view your clouds, edit them, and access them for further intelligent interactions</h3>
+    <div className='dashboard-page-main p-5 pt-10'>
+      <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance mb-3">Welcome to your &nbsp;<span id="grotesk-font" className="">Dashboard</span></h1>
+      <h3 className="mb-7">Here, you can view your clouds, edit them, and access them for further intelligent interactions</h3>
       
       {/* Clouds Form Button */}
       {createCloud ? (
@@ -142,7 +161,7 @@ function DashboardPage() {
         {/* Clouds Form */}
         <br/><br/>
         {createCloud && (
-          <div className='w-[35vw] p-8 border rounded-lg'>
+          <div className='w-[35vw] p-8 border rounded-lg mb-5'>
             <h3 className='scroll-m-20 text-lg font-semibold tracking-tight mb-3'>Name of your new collection</h3>
             <Input disabled={loadingCreateCloud} value={createCloudName} onChange={(e) => setCreateCloudName(e.target.value)} placeholder="Ex: AI Research" />
             <br/>
@@ -157,74 +176,74 @@ function DashboardPage() {
           </div>
         )}
 
-        {clouds.length>0 ? (
-          <h1>Loaded!!!</h1>
-        ):(
+        {clouds.length==0 && (
           <h1>Loading...</h1>
         )}
 
-        {/* {clouds.map((cloud) => (
-          <div key={cloud.cloud_name} className='h-[25vh] w-[25vw] p-8 bg-[rgb(12, 12, 12)] border rounded-sm overflow-scroll flex justify-between flex-col'>
-            <div className='flex items-center gap-3 mb-5'>
-              <Cloud/>
-              <h1 className='scroll-m-20 text-xl font-semibold tracking-tight'>{cloud.cloud_name}</h1>
-            </div>
-            <h1 className='mb-3'>Number of entities: {cloud.count==0 ? "0" : cloud.count-1}</h1>
-            <div className='flex items-center justify-between w-full gap-1'>
-              <Button onClick={() => getAllVectors(cloud.cloud_name)} className='flex-1 w-full font-mono cursor-pointer' variant={'outline'}>
-                {loadingCloudData ? (
-                  <TailwindSpinner/>
-                ):(
-                  <p>Enter cloud</p>
-                )}
-              </Button>
-              <div className=''>
-                <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <div className="flex items-center gap-3">
+          {clouds.map((cloud) => (
+            <div key={cloud.cloud_name} className='h-[25vh] w-[30vw] p-8 bg-[rgb(12, 12, 12)] border rounded-sm overflow-scroll flex justify-between flex-col'>
+              <div className='flex items-center gap-3 mb-5'>
+                <Cloud/>
+                <h1 className='scroll-m-20 text-xl font-semibold tracking-tight'>{cloud.cloud_name}</h1>
+              </div>
+              <h1 className='mb-3'>Number of entities: {cloud.count==0 ? "0" : cloud.count-1}</h1>
+              <div className='flex items-center justify-between w-full gap-2'>
+                <Button onClick={() => enterCloud(cloud.cloud_name)} className='flex-1 w-full font-mono cursor-pointer' variant={'outline'}>
+                  {loadingCloudData ? (
+                    <TailwindSpinner/>
+                  ):(
+                    <p>Enter cloud</p>
+                  )}
+                </Button>
+                <div className=''>
+                  <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button className='w-full font-mono text-red-400 cursor-pointer' variant={'outline'}>Delete cloud</Button>
+                      {/* <Button className='w-full' variant={'destructive'}><Trash/></Button> */}
+                    </DialogTrigger>
+                    <DialogContent className="w-[30vw]">
+                      <DialogHeader>
+                        <DialogTitle className="mb-3">Are you absolutely sure?</DialogTitle>
+                        <DialogDescription className="mb-5">
+                          This action cannot be undone. This will permanently delete your cloud
+                          and remove any data within it.
+                        </DialogDescription>
+                        <div className="w-full flex items-center justify-center gap-2">
+                          {deleteCloudState ? (
+                            <Button className="w-full flex-1" disabled={true}><TailwindSpinner/></Button>
+                          ):(
+                            <Button className="w-full flex-1" onClick={() => deleteNamespace(cloud.cloud_name)}>Yes I'm sure</Button>
+                          )}
+                          <Button className="w-full flex-1" variant={'outline'} onClick={() => setDeleteDialogOpen(false)}>No let's go back</Button>
+                        </div>
+                      </DialogHeader>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+                <Dialog>
                   <DialogTrigger asChild>
-                    <Button className='w-full font-mono text-red-400 cursor-pointer' variant={'outline'}>Delete cloud</Button>
-                    <Button className='w-full' variant={'destructive'}><Trash/></Button>
+                    <Button><Edit/></Button>
                   </DialogTrigger>
                   <DialogContent className="w-[30vw]">
                     <DialogHeader>
-                      <DialogTitle className="mb-3">Are you absolutely sure?</DialogTitle>
-                      <DialogDescription className="mb-5">
-                        This action cannot be undone. This will permanently delete your cloud
-                        and remove any data within it.
+                      <DialogTitle>Edit Cloud: {cloud.cloud_name}</DialogTitle>
+                      <DialogDescription className="mb-3">
+                        You can only modify the name of the cloud
                       </DialogDescription>
-                      <div className="w-full flex items-center justify-center gap-2">
-                        {deleteCloudState ? (
-                          <Button className="w-full flex-1" disabled={true}><TailwindSpinner/></Button>
-                        ):(
-                          <Button className="w-full flex-1" onClick={() => deleteNamespace(cloud.cloud_name)}>Yes I'm sure</Button>
-                        )}
-                        <Button className="w-full flex-1" variant={'outline'} onClick={() => setDeleteDialogOpen(false)}>No let's go back</Button>
+                      <Label className="mb-1">Enter new name</Label>
+                      <Input value={editCloudName} onChange={(e) => setEditCloudName(e.target.value)} className="mb-3"/>
+                      <div className="flex items-center gap-1">
+                        <Button onClick={setNewName} className="w-fit">Submit changes</Button>
+                        <Button variant={'secondary'} className="w-fit">Go back</Button>
                       </div>
                     </DialogHeader>
                   </DialogContent>
                 </Dialog>
               </div>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button><Edit/></Button>
-                </DialogTrigger>
-                <DialogContent className="w-[30vw]">
-                  <DialogHeader>
-                    <DialogTitle>Edit Cloud: {cloud.cloud_name}</DialogTitle>
-                    <DialogDescription className="mb-3">
-                      You can only modify the name of the cloud
-                    </DialogDescription>
-                    <Label className="mb-1">Enter new name</Label>
-                    <Input value={editCloudName} onChange={(e) => setEditCloudName(e.target.value)} className="mb-3"/>
-                    <div className="flex items-center gap-1">
-                      <Button onClick={setNewName} className="w-fit">Submit changes</Button>
-                      <Button variant={'secondary'} className="w-fit">Go back</Button>
-                    </div>
-                  </DialogHeader>
-                </DialogContent>
-              </Dialog>
             </div>
-          </div>
-        ))} */}
+          ))}
+        </div>
     </div>
   )
 }
