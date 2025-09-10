@@ -61,7 +61,7 @@ function CloudPage() {
   // ------------------------------------------------------------------------
   // ------------------------------------------------------------------------
 
-  async function refreshCloudData(namespace) {
+  async function refreshCloudData(namespace) { // This function will mainly SET: ["LOADING STATE", "IN-COMPONENT DATA", "STORE CLOUD DATA", "STORE CLOUD"]
     console.log("🔄 [CloudPage] refreshCloudData called with namespace:", namespace);
     setLoading(true);
     console.log("⏳ [CloudPage] Setting loading state to true");

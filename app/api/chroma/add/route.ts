@@ -10,9 +10,17 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const documents = body.documents;
     const filename = body.filename;
+    const cloud_name = body.cloud_name
+    const file_type = body.file_type
 
-    const ids = Array.from({ length: documents.length }, (_, i) => (i + 1).toString());
-    const metadatas = Array.from({ length: documents.length }, () => ({ file_name: `${filename}` }));
+    const ids = Array.from({ length: documents.length }, (_, i) => `cloud_${cloud_name}_${filename}_${i+1}`);
+    const metadatas = Array.from({ length: documents.length }, () => (
+      { 
+        file_name: `${filename}`, 
+        category: "Media",  
+        type: file_type,
+        cloud: cloud_name
+      }));
 
     const collection = await client.getOrCreateCollection({
       name: 'myCollection',
