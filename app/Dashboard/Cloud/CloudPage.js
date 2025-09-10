@@ -55,9 +55,9 @@ function CloudPage() {
   // ---------------------Handling chat input-----------------------------
   // ------------------------------------------------------------------------
   const [userInputOverall, setUserInputOverall] = useState("");
+  const [thinkHarder, setThinkHarder] = useState(false)
   const [messages, setMessages] = useState([]);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [thinkHarder, setThinkHarder] = useState(false)
   // ------------------------------------------------------------------------
   // ------------------------------------------------------------------------
 
