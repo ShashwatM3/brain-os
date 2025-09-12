@@ -55,9 +55,9 @@ function CloudPage() {
   // ---------------------Handling chat input-----------------------------
   // ------------------------------------------------------------------------
   const [userInputOverall, setUserInputOverall] = useState("");
+  const [thinkHarder, setThinkHarder] = useState(false)
   const [messages, setMessages] = useState([]);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [thinkHarder, setThinkHarder] = useState(false)
   // ------------------------------------------------------------------------
   // ------------------------------------------------------------------------
 
@@ -294,7 +294,7 @@ function CloudPage() {
       ...prevMessages,
       {"role": "user", "content": userInputOverall},
     ]))
-    const res = await fetch('/api/ai/rag', {
+    const res = await fetch('/api/ai/rag-pinecone', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

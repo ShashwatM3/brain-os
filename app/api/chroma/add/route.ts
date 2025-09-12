@@ -12,12 +12,13 @@ export async function POST(req: NextRequest) {
     const filename = body.filename;
     const cloud_name = body.cloud_name
     const file_type = body.file_type
+    const category = body.category
 
     const ids = Array.from({ length: documents.length }, (_, i) => `cloud_${cloud_name}_${filename}_${i+1}`);
     const metadatas = Array.from({ length: documents.length }, () => (
       { 
         file_name: `${filename}`, 
-        category: "Media",  
+        category: category,  
         type: file_type,
         cloud: cloud_name
       }));
