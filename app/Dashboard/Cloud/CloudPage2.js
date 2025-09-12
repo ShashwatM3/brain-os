@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowUpRightFromSquare, AtSign, BookText, Brain, Check, Cloud, Cloudy, Forward, GitBranchPlusIcon, GitGraph, MessageCircleMore, MicVocal, MoveRight, MoveRightIcon, NotebookPenIcon, Plus, PointerIcon, Recycle, RefreshCcw, Repeat, Send, SendHorizonal, SendIcon, Sparkle, SparkleIcon, Sparkles, TrendingUpDown, Users, X } from 'lucide-react';
+import { ArrowUpRightFromSquare, AtSign, BookText, Brain, Check, Cloud, Cloudy, Forward, GitBranchPlusIcon, GitGraph, HelpCircleIcon, InfoIcon, MessageCircleMore, MicVocal, MoveRight, MoveRightIcon, NotebookPen, NotebookPenIcon, Plus, PointerIcon, Recycle, RefreshCcw, Repeat, Send, SendHorizonal, SendIcon, Sparkle, SparkleIcon, Sparkles, TrendingUpDown, Users, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useRef } from 'react'
 import pdfToText from 'react-pdftotext'
@@ -22,6 +22,7 @@ import { Switch } from '@/components/ui/switch';
 import { AuroraText } from '@/components/magicui/aurora-text';
 import ContentEditable from "react-contenteditable";
 import TurndownService from "turndown";
+import GeneralChat from './(cloudcomps)/GeneralChat';
 
 function CloudPage2() {
   // ------------------------------------------------------------------------
@@ -49,6 +50,7 @@ function CloudPage2() {
   const hiddenFileInput = useRef(null);
   const [currentMediaDetails, setCurrentMediaDetails] = useState({});
   const [fileName, setFileName] = useState("");
+  const [fileDescription, setFileDescription] = useState("");
   const [refineStage, setRefineStage] = useState(false);
   // ------------------------------------------------------------------------
   // ------------------------------------------------------------------------
@@ -110,18 +112,19 @@ function CloudPage2() {
   const [chatWithIt, setChatWithIt] = useState([]);
   const [chatWithItFileName, setChatWithItFileName] = useState("");
   const [userInputOverall, setUserInputOverall] = useState("");
-  const [thinkHarder, setThinkHarder] = useState(false)
+  const [thinkHarder, setThinkHarder] = useState(false);
+  const [toolOpen, setToolOpen] = useState(false);
   // ------------------------------------------------------------------------
   // ------------------------------------------------------------------------
   // ------------------------------------------------------------------------
 
   const tools = [
-    { name: "General chat", icon: MessageCircleMore },
-    { name: "Create Reports", icon: BookText },
-    { name: "Have a Discussion", icon: Users },
-    { name: "Concept Graph", icon: GitBranchPlusIcon },
-    { name: "Podcast-it", icon: MicVocal },
-    { name: "Create Workflows", icon: TrendingUpDown },
+    { name: "General chat", icon: MessageCircleMore, component: GeneralChat },
+    { name: "Create Reports", icon: BookText, component: GeneralChat },
+    { name: "Have a Discussion", icon: Users, component: GeneralChat },
+    { name: "Concept Graph", icon: GitBranchPlusIcon, component: GeneralChat },
+    { name: "Podcast-it", icon: MicVocal, component: GeneralChat },
+    { name: "Create Workflows", icon: TrendingUpDown, component: GeneralChat },
   ];
 
   function onBack() {
@@ -271,7 +274,7 @@ function CloudPage2() {
 
     // Start chunking
     if (currentMediaDetails.text.length > 750) {
-      const chunks = await chunking(currentMediaDetails.text);
+      const chunks = await chunking(`This content is about: ${fileDescription}. Contents: ${currentMediaDetails.text}`);
       setLoadingText("Compressing your file....")
       console.log(chunks);
 
@@ -297,6 +300,7 @@ function CloudPage2() {
           setLoadingText("");
           setCurrentMediaDetails({});
           setFileName("");
+          setFileDescription("")
           setTimeout(function() {
             console.log("⏰ [CloudPage] AddToCloud timeout triggered, calling refreshCloudData");
             refreshCloudData(name)
@@ -385,21 +389,24 @@ function CloudPage2() {
       <div className='cloud-page-main p-8 pt-13'>
         {/* --------------------------------------------------------- */}
         {/* Setting BLUR Overlay */}
-        {(sheetNote || sheetChatWithIt) && (
+        {(sheetNote || sheetChatWithIt || toolOpen) && (
           <div className="absolute inset-0 bg-black/0 backdrop-blur-lg pointer-events-none z-2"></div>
         )}
 
         {/* HEADER FOR INFORMATION */}
-        <div className='flex items-center justify-between'>
-          <div>
+        <div className='flex items-center justify-between w-full'>
+          <div className='w-full'>
             <h1 id="grotesk-font" className='text-4xl mb-5 flex items-center gap-4'>
               <Cloudy className='h-10 w-10'/>
               <span>Your Cloud: <span className='font-bold'>{name}</span></span>
             </h1>
-            <h3 className='w-[45%] mb-5 opacity-[70%]'>{description}</h3>
-            <div className='flex items-center gap-2'>
-              <Button variant={'outline'}>Edit details</Button>
-              <Button className='cursor-pointer' onClick={onBack} variant={'secondary'}>Back to Clouds Home <Forward/></Button>
+            <h3 className='w-[60%] mb-5 opacity-[70%]'>{description}</h3>
+            <div className='flex items-center justify-between pr-4'>
+              <div className='flex items-center gap-2'>
+                <Button variant={'outline'}>Edit details</Button>
+                <Button className='cursor-pointer' onClick={onBack} variant={'secondary'}>Back to Clouds Home <Forward/></Button>
+              </div>
+              <Button className='bg-neutral-900 cursor-pointer' variant={'ghost'}><InfoIcon/>How to use?</Button>
             </div>
           </div>
           <div className='border border-neutral-700 rounded-md p-5 w-[30vw]'>
@@ -431,9 +438,16 @@ function CloudPage2() {
                 <DialogDescription className='mb-5 text-md'>
                   <span className='font-bold text-md'>Media Name</span><br/>
                   <Input
-                    className="mb-4 mt-3 text-white"
+                    className="mb-7 mt-3 text-white"
                     value={fileName || ""}
                     onChange={(e) => setFileName(e.target.value)}
+                  />
+                  <span className='text-md'>Give us a short description to help us understand<br/> what the file is about</span><br/>
+                  <Input
+                    className="mb-7 mt-3 text-white"
+                    value={fileDescription}
+                    placeholder='A roadmap to learning how to be a cook where....'
+                    onChange={(e) => setFileDescription(e.target.value)}
                   />
                   <><span className='font-bold'>Media Size: </span>{currentMediaDetails.text.length} Chars</>
                 </DialogDescription>
@@ -461,10 +475,10 @@ function CloudPage2() {
           <div>
             {/* Displaying files */}
             <div className='flex items-center justify-center gap-3 h-[36vh]'>
-              <div className='p-7 border rounded-lg border-neutral-700 bg-neutral-950 flex-1 h-full'>
+              <div className='p-7 border rounded-lg border-neutral-700 bg-neutral-950 w-1/2 overflow-scroll h-full'>
                 <div className='flex items-center justify-between'>
                   <h1 className='scroll-m-20 text-xl font-semibold tracking-tight mb-5'><span className='py-1 px-4 rounded-lg bg-neutral-900 text-red-400'>Layer 1</span> — Your Media</h1>
-                  <div className=''>
+                  <div className='mb-2'>
                     <Button variant={'outline'} onClick={handleClick}><Plus/> Add media</Button>
                     <input
                       type="file"
@@ -475,12 +489,12 @@ function CloudPage2() {
                     />
                   </div>
                 </div>
-                <div className='flex items-start gap-3'>
+                <div className='flex items-start gap-3 overflow-x-auto overflow-y-hidden'>
                   {console.log(data[0])}
                   {data.filter(media => media.category == "Media").length > 0 ? (
                     data.map((media, index) => (
                       media.category == "Media" && (
-                        <div className='w-[30vw] h-[25vh] flex items-start justify-between flex-col py-7 px-6 border' key={index}>
+                        <div className='w-[30vw] h-[25vh] flex items-start justify-between flex-col py-7 px-6 border flex-shrink-0' key={index}>
                           <h1 className='scroll-m-20 text-2xl font-semibold tracking-tight'>{media.file_name}</h1>
                           <div className='flex items-center justify-between w-full'>
                             <div className='flex items-center gap-2'>
@@ -566,7 +580,7 @@ function CloudPage2() {
                     data.map((media, index) => (
                       media.category == "Notes" && (
                         <div className='w-[30vw] h-[25vh] flex items-start justify-between flex-col py-7 px-6 border' key={index}>
-                          <h1 className='scroll-m-20 text-2xl font-semibold tracking-tight'>{media.file_name}</h1>
+                          <h1 className='scroll-m-20 text-2xl font-semibold tracking-tight flex items-center gap-3'><NotebookPen className='text-neutral-400'/>{media.file_name}</h1>
                           <div className='flex items-center justify-between w-full'>
                             <div className='flex items-center gap-2'>
                               <Button className='bg-blue-600 text-white cursor-pointer hover:bg-transparent hover:bg-blue-800'>Open</Button>
@@ -674,6 +688,7 @@ function CloudPage2() {
               <div className='flex items-start gap-3 overflow-x-scroll'>
               {tools.map((tool, index) => {
                 const IconComponent = tool.icon;
+                const ToolComponent = tool.component
                 return (
                   <div className='min-w-[20vw] h-[20vh] flex items-start justify-between flex-col py-7 px-6 border' key={index}>
                     <h1 className='scroll-m-20 text-2xl font-semibold tracking-tight flex items-center gap-2' id="grotesk-font">
@@ -682,15 +697,13 @@ function CloudPage2() {
                     </h1>
                     <div className='flex items-center justify-between w-full'>
                       <div className='flex items-center gap-2'>
-                        <Button variant={'outline'} className="flex items-center gap-1">
-                          More Info
-                        </Button>
-                        <Button>Launch</Button>
+                        <ToolComponent data={currentCloud} cloudName={currentCloudName} setBlur={setToolOpen}/>
                       </div>
                     </div>
                   </div>
                 );
                 })}
+                {console.log(currentCloud)}
               </div>
             </div>
 

@@ -294,7 +294,7 @@ function CloudPage() {
       ...prevMessages,
       {"role": "user", "content": userInputOverall},
     ]))
-    const res = await fetch('/api/ai/rag', {
+    const res = await fetch('/api/ai/rag-pinecone', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
