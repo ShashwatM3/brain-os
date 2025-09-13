@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowUpRightFromSquare, AtSign, BookText, Brain, Check, Cloud, Cloudy, Forward, GitBranchPlusIcon, GitGraph, HelpCircleIcon, InfoIcon, MessageCircleMore, MicVocal, MoveRight, MoveRightIcon, NotebookPen, NotebookPenIcon, Plus, PointerIcon, Recycle, RefreshCcw, Repeat, Send, SendHorizonal, SendIcon, Sparkle, SparkleIcon, Sparkles, TrendingUpDown, Users, X } from 'lucide-react';
+import { ArrowUpRightFromSquare, AtSign, BookText, Brain, Check, Cloud, Cloudy, Forward, GitBranchPlusIcon, GitGraph, HelpCircleIcon, InfoIcon, MessageCircleMore, MicVocal, MoveRight, MoveRightIcon, NotebookPen, NotebookPenIcon, Plus, PointerIcon, Recycle, RefreshCcw, Repeat, Send, SendHorizonal, SendIcon, Sparkle, SparkleIcon, Sparkles, Trash2, TrendingUpDown, Users, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useRef } from 'react'
 import pdfToText from 'react-pdftotext'
@@ -23,6 +23,7 @@ import { AuroraText } from '@/components/magicui/aurora-text';
 import ContentEditable from "react-contenteditable";
 import TurndownService from "turndown";
 import GeneralChat from './(cloudcomps)/GeneralChat';
+import CreateReport from "./(cloudcomps)/CreateReport"
 
 function CloudPage2() {
   // ------------------------------------------------------------------------
@@ -120,7 +121,7 @@ function CloudPage2() {
 
   const tools = [
     { name: "General chat", icon: MessageCircleMore, component: GeneralChat },
-    { name: "Create Reports", icon: BookText, component: GeneralChat },
+    { name: "Create Reports", icon: BookText, component: CreateReport },
     { name: "Have a Discussion", icon: Users, component: GeneralChat },
     { name: "Concept Graph", icon: GitBranchPlusIcon, component: GeneralChat },
     { name: "Podcast-it", icon: MicVocal, component: GeneralChat },
@@ -341,6 +342,32 @@ function CloudPage2() {
     return str.charAt(0).toUpperCase() + str.slice(1); 
   }
 
+  async function deleteFile(fileName) {
+    try {
+      const res = await fetch("/api/chroma/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          metadata_object: {
+            file_name: fileName,
+          },
+          collection_name: "myCollection",
+        }),
+      });
+    
+      const data = await res.json();
+      if (data && data.response == "success") {
+        toast.success("Data removed");
+        setTimeout(function() {
+          refreshCloudData(currentCloudName);
+        }, 2000);
+      }
+    } catch (err) {
+      console.error("Error sending POST request:", err);
+    }
+  }
 
   // --------------------------------------------------------------------------
   // ----------------------CHAT WITH A SPECIFIC FILE---------------------------
@@ -500,6 +527,7 @@ function CloudPage2() {
                             <div className='flex items-center gap-2'>
                               <Button className='bg-blue-600 text-white cursor-pointer hover:bg-transparent hover:bg-blue-800'>Open</Button>
                               <Button onClick={() => chatWithIt_1(media.file_name)} variant={'outline'}>Chat with it <Sparkles/></Button>
+                              <Button onClick={() => deleteFile(media.file_name)} variant={'outline'}><Trash2/></Button>
                             </div>
                             <h1 className='text-neutral-400'>{capitalizeFirstLetter(media.type)}</h1>
                           </div>
@@ -585,6 +613,7 @@ function CloudPage2() {
                             <div className='flex items-center gap-2'>
                               <Button className='bg-blue-600 text-white cursor-pointer hover:bg-transparent hover:bg-blue-800'>Open</Button>
                               <Button onClick={() => chatWithIt_1(media.file_name)} variant={'outline'}>Chat with it <Sparkles/></Button>
+                              <Button><Trash2/></Button>
                             </div>
                             <h1 className='text-neutral-400'>{capitalizeFirstLetter(media.type)}</h1>
                           </div>
