@@ -189,3 +189,9 @@
   font-optical-sizing: auto;
   font-style: normal;
 }
+
+.prose h1 { font-size: 1.75rem; font-weight: bold; margin-top: 1em; }
+.prose h2 { font-size: 1.5rem; font-weight: bold; margin-top: 1em; }
+.prose h3 { font-size: 1.25rem; font-weight: bold; margin-top: 0.75em; }
+.prose p { margin-bottom: 0.5em; }
+.prose strong { font-weight: bold; }

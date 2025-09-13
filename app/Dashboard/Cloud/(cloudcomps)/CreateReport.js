@@ -10,12 +10,18 @@ import {
 } from "@/components/ui/sheet"
 import { Input } from '@/components/ui/input';
 import { Textarea } from "@/components/ui/textarea"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { CheckCheck } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 function CreateReport() {
   const [reportTopic, setReportTopic] = useState("");
   const [reportPurpose, setReportPurpose] = useState("");
   const [reportLength, setReportLength] = useState("");
   const [structureFormat, setStructureFormat] = useState("");
+  const [reports, setReports] = useState([]);
+
+  const [workflowSteps, setWorkflowSteps] = useState([]);
   
   const options = [
     { label: "Brief (1–2 pages)", value: "Brief (1–2 pages)" },
@@ -58,11 +64,27 @@ function CreateReport() {
 
         if (msg.status === "update") {
           console.log("Update:", msg.message);
+          setWorkflowSteps(prev => [...prev, [msg.message, "not final"]])
         }
 
         if (msg.status === "done") {
           console.log("Final:", msg.result);
           finalResult = msg.result;
+          setWorkflowSteps(prev => [...prev, [msg.message, "final"]])
+
+          setReports(prev => [...prev, {
+            report_instructions: `
+- **Report Topic**: ${reportTopic}
+
+- **Report Purpose**: ${reportPurpose}
+
+- **Length and Depth**: ${reportLength}
+
+- **Structure Format**: ${structureFormat}
+            `,
+            report_generated: msg.result,
+            sources: msg.sources
+          }])
         }
       }
     }
@@ -127,11 +149,88 @@ function CreateReport() {
               onChange={(e) => setStructureFormat(e.target.value)}
               />
               {/* ===================== End ======================== */}
-              <Button onClick={initiateWorkflow} className='w-fit cursor-pointer' variant={'secondary'}>Generate Report</Button>
+              <div className='flex items-center gap-2 w-full justify-between'>
+                <Button onClick={initiateWorkflow} className='w-fit cursor-pointer' variant={''}>Generate Report</Button>
+                {reports.length > 0 && (
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button className='w-fit cursor-pointer' variant={'secondary'}>View previous reports</Button>
+                    </SheetTrigger>
+                    <SheetContent className='min-w-[40vw] p-5'>
+                      <SheetHeader>
+                        <SheetTitle className='scroll-m-20 text-2xl font-semibold tracking-tight'>Reports</SheetTitle>
+                        <SheetDescription className='mb-4'>
+                          View all your previously generated reports and their details below
+                        </SheetDescription>
+                        {reports.map((report, index) => (
+                          <div key={index} className='border border-neutral-500 rounded-lg p-5'>
+                            <ReactMarkdown>
+                              {report.report_instructions}
+                            </ReactMarkdown>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button className='mt-5'>View Report</Button>
+                              </DialogTrigger>
+                              <DialogContent className='h-[45vh] overflow-scroll min-w-[45vw]'>
+                                <DialogHeader>
+                                  <DialogTitle></DialogTitle>
+                                  <DialogDescription>
+                                  </DialogDescription>
+                                  <ReactMarkdown className="prose prose-stone">
+                                      {report.report_generated}
+                                    </ReactMarkdown>
+                                </DialogHeader>
+                              </DialogContent>
+                            </Dialog>
+                          </div>
+                        ))}
+                      </SheetHeader>
+                    </SheetContent>
+                  </Sheet>
+                )}
+              </div>
             </SheetHeader>
           </SheetContent>
         </Sheet>
         <Button variant={'outline'}>More info</Button>
+
+        <Dialog open={workflowSteps.length>0}>
+          <DialogTrigger asChild>
+            <Button className='hidden'></Button>
+          </DialogTrigger>
+          <DialogContent className='p-5'>
+            <DialogHeader>
+              <DialogTitle>Status updates</DialogTitle>
+              <DialogDescription className='mb-3'>
+                What's cooking in the kitchen right now!
+              </DialogDescription>
+              <div className='flex items-start justify-center gap-2 flex-col'>
+                {workflowSteps.map((workflowStep, index) => (
+                  workflowStep[1] == "not final" ? (
+                    <div id={`${(workflowStep[1] == "not final" && (index == workflowSteps.length-1)) ? "fadeInOut" : ""}`} key={index} className='flex items-center gap-2'>
+                      <div className={`h-4 w-4 rounded-full ${(workflowStep[1] == "not final" && (index == workflowSteps.length-1)) ? "bg-yellow-500" : "bg-green-500"}`}></div>
+                      <h1>{workflowStep[0]}</h1>
+                    </div>
+                  ) : workflowStep[1] == "final" ? (
+                    <div key={index}>
+                      <div className='flex items-center gap-2 mb-4'>
+                        <CheckCheck className='text-green-500'/>
+                        <h1>{workflowStep[0]}</h1>
+                      </div>
+                      <Button onClick={() => {
+                        setReportTopic("");
+                        setReportPurpose("");
+                        setReportLength("");
+                        setStructureFormat("");
+                        setWorkflowSteps([]);
+                      }} variant={'outline'}>Click here to close the window once you're done</Button>
+                    </div>
+                  ) : null
+                ))}
+              </div>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

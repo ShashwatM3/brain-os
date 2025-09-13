@@ -613,7 +613,7 @@ function CloudPage2() {
                             <div className='flex items-center gap-2'>
                               <Button className='bg-blue-600 text-white cursor-pointer hover:bg-transparent hover:bg-blue-800'>Open</Button>
                               <Button onClick={() => chatWithIt_1(media.file_name)} variant={'outline'}>Chat with it <Sparkles/></Button>
-                              <Button><Trash2/></Button>
+                              <Button variant={'outline'}><Trash2/></Button>
                             </div>
                             <h1 className='text-neutral-400'>{capitalizeFirstLetter(media.type)}</h1>
                           </div>
