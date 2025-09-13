@@ -63,6 +63,7 @@ Your task is to take in the user’s specifications for a report and produce a s
 - **Report Purpose**: ${report_details.report_purpose}
 - **Length and Depth**: ${report_details.report_length}
 - **Structure Format**: ${report_details.report_structure}
+- **Additional Description**: ${report_details.additional_description || "None provided"}
 
 ---
 
@@ -100,7 +101,7 @@ Your task is to take in the user’s specifications for a report and produce a s
         let iteration = 1;
         let refinement_instructions = ""
         let final_report = ""
-        let sources: any = []
+        const sources: any = []
 
         while (true) {
           // Generating the list of queries for Vector DB
@@ -232,6 +233,7 @@ ${result_context}
 - **Report Purpose**: ${report_details.report_purpose}  
 - **Length and Depth**: ${report_details.report_length}  
 - **Structure Format**: ${report_details.report_structure}  
+- **Additional Description**: ${report_details.additional_description || "None provided"}  
 
 ### OutlineObject
 ${JSON.stringify(object.Outline)}
@@ -330,13 +332,14 @@ ${JSON.stringify(object.Outline)}
 - **Report Purpose**: ${report_details.report_purpose}
 - **Length and Depth**: ${report_details.report_length}
 - **Structure Format**: ${report_details.report_structure}
+- **Additional Description**: ${report_details.additional_description || "None provided"}
 
 ### RefinementAgentInstructions
 ${JSON.stringify(object.RefinementAgentInstructions)}
             `
           })
 
-          send({ status: "update", message: `Feedback generated`});
+          send({ status: "update", message: `Feedback for ${iteration}`});
 
           final_report = markdownReport
 

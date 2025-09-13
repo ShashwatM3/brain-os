@@ -5,6 +5,7 @@ const {heroui} = require("@heroui/theme");
 module.exports = {
   content: [
     "./node_modules/@heroui/theme/dist/components/toggle.js",
+    "./node_modules/onborda/dist/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {},

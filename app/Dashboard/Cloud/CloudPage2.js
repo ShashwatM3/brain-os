@@ -24,6 +24,7 @@ import ContentEditable from "react-contenteditable";
 import TurndownService from "turndown";
 import GeneralChat from './(cloudcomps)/GeneralChat';
 import CreateReport from "./(cloudcomps)/CreateReport"
+import { useTour } from '@reactour/tour'
 
 function CloudPage2() {
   // ------------------------------------------------------------------------
@@ -117,6 +118,8 @@ function CloudPage2() {
   const [toolOpen, setToolOpen] = useState(false);
   // ------------------------------------------------------------------------
   // ------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
+  const { setIsOpen } = useTour()
   // ------------------------------------------------------------------------
 
   const tools = [
@@ -433,7 +436,7 @@ function CloudPage2() {
                 <Button variant={'outline'}>Edit details</Button>
                 <Button className='cursor-pointer' onClick={onBack} variant={'secondary'}>Back to Clouds Home <Forward/></Button>
               </div>
-              <Button className='bg-neutral-900 cursor-pointer' variant={'ghost'}><InfoIcon/>How to use?</Button>
+              <Button onClick={() => {setIsOpen(true)}} className='bg-neutral-900 cursor-pointer' variant={'ghost'}><InfoIcon/>How to use?</Button>
             </div>
           </div>
           <div className='border border-neutral-700 rounded-md p-5 w-[30vw]'>
@@ -502,7 +505,7 @@ function CloudPage2() {
           <div>
             {/* Displaying files */}
             <div className='flex items-center justify-center gap-3 h-[36vh]'>
-              <div className='p-7 border rounded-lg border-neutral-700 bg-neutral-950 w-1/2 overflow-scroll h-full'>
+              <div className='first-step p-7 border rounded-lg border-neutral-700 bg-neutral-950 w-1/2 overflow-scroll h-full'>
                 <div className='flex items-center justify-between'>
                   <h1 className='scroll-m-20 text-xl font-semibold tracking-tight mb-5'><span className='py-1 px-4 rounded-lg bg-neutral-900 text-red-400'>Layer 1</span> — Your Media</h1>
                   <div className='mb-2'>
@@ -541,7 +544,7 @@ function CloudPage2() {
                   )}
                 </div>
               </div>
-              <div className='p-7 border rounded-lg border-neutral-700 bg-neutral-950 flex-1 h-full'>
+              <div className='second-step p-7 border rounded-lg border-neutral-700 bg-neutral-950 flex-1 h-full'>
                 <div className='flex items-center justify-between'>
                   <h1 className='scroll-m-20 text-xl font-semibold tracking-tight mb-5'><span className='py-1 px-4 rounded-lg bg-neutral-900 text-red-400'>Layer 2</span> — Your Notes</h1>
                   <div className=''>
@@ -709,7 +712,7 @@ function CloudPage2() {
             <br/>
 
             {/* Displaying TOOLKIT */}
-            <div className='p-7 border rounded-lg border-neutral-700 bg-neutral-950'>
+            <div className='third-step p-7 border rounded-lg border-neutral-700 bg-neutral-950'>
               <div className='flex items-center justify-between mb-5'>
                 <h1 className='scroll-m-20 text-xl font-semibold tracking-tight'><span className='py-1 px-4 rounded-lg bg-neutral-900 text-green-400'>Layer 3</span> —  Your <AuroraText className='z-1'>Intelligence</AuroraText> Layer</h1>
                 <h3 className='text-neutral-400 font-bold'>Here, you can interact with your data and uncover key insights through several ways</h3>

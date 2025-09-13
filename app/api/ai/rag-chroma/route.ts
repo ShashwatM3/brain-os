@@ -48,7 +48,9 @@ Response:
 
 
 Additional rules:
-4. For any greetings, make sure to describe that you are an assistant who will help them for any questions by retrieving context and then providing back grounded information.
+4. For any greetings, small-talk, or casual phrases (e.g. "Hello", "Hi", "How are you", "What's up"), always respond with { "action": "answer", "content": "..." }. 
+   In this case, give a general friendly response or if it's a greeting: describe that you are an assistant who can retrieve context and provide grounded information based off their "cloud data". 
+   Do NOT classify these as "search".
 5. Strictly make sure your response is ONLY a parsable JSON.
 
 Now, process the following:
@@ -67,8 +69,14 @@ User's question: ${inputText}
     } catch {
       return NextResponse.json({ error: "Invalid JSON returned from model." }, { status: 500 });
     }
-
-    // Direct answer
+    
+    const greetingRegex = /^(hi|hello|hey|how are you|good (morning|afternoon|evening)|what's up)/i;
+    if (greetingRegex.test(inputText.trim())) {
+      return NextResponse.json({
+        response: "Hello! I'm your assistant. I can help answer questions by retrieving context and providing grounded information."
+      });
+    }
+    
     if (finalOut.action === "answer") {
       return NextResponse.json({ response: finalOut.content });
     }

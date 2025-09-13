@@ -13,14 +13,19 @@ import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { CheckCheck } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { useRef } from 'react';
+import { useReactToPrint } from "react-to-print";
+import { toast } from 'sonner';
 
 function CreateReport() {
   const [reportTopic, setReportTopic] = useState("");
   const [reportPurpose, setReportPurpose] = useState("");
   const [reportLength, setReportLength] = useState("");
   const [structureFormat, setStructureFormat] = useState("");
+  const [additionalDescription, setAdditionalDescription] = useState("");
   const [reports, setReports] = useState([]);
-
+  const dialogRef = useRef(null);
+  const reactToPrintFn = useReactToPrint({ contentRef: dialogRef });
   const [workflowSteps, setWorkflowSteps] = useState([]);
   
   const options = [
@@ -28,6 +33,19 @@ function CreateReport() {
     { label: "Standard (3–5 pages)", value: "Standard (3–5 pages" },
     // { label: "In-depth (8–10 pages)", value: "indepth" },
   ];
+
+  function printAsPdf() {
+    toast.info("Loading...");
+    if (dialogRef.current) {
+      dialogRef.current.style.color = "black";
+      dialogRef.current.style.padding = "30px";
+    }
+    setTimeout(() => {
+      reactToPrintFn();
+      dialogRef.current.style.color = "white";
+      dialogRef.current.style.padding = "0px";
+    }, 2000);
+  }
 
   async function initiateWorkflow() {
     const res = await fetch("/api/ai/report-brief", {
@@ -40,7 +58,8 @@ function CreateReport() {
           report_topic: reportTopic,
           report_purpose: reportPurpose,
           report_length: reportLength,
-          report_structure: structureFormat
+          report_structure: structureFormat,
+          additional_description: additionalDescription
         },
         collection_name: "myCollection"
       }),
@@ -81,6 +100,8 @@ function CreateReport() {
 - **Length and Depth**: ${reportLength}
 
 - **Structure Format**: ${structureFormat}
+
+- **Additional Description**: ${additionalDescription}
             `,
             report_generated: msg.result,
             sources: msg.sources
@@ -99,7 +120,7 @@ function CreateReport() {
           <SheetTrigger asChild>
             <Button>Launch</Button>
           </SheetTrigger>
-          <SheetContent className='p-5 pt-10 min-w-[50vw]'>
+          <SheetContent className='p-5 pt-10 min-w-[50vw] overflow-scroll'>
             <SheetHeader>
               <SheetTitle>
                 <span id='grotesk-font' className='scroll-m-20 text-3xl font-bold tracking-tight text-balance'>Generate a Report</span>
@@ -148,9 +169,18 @@ function CreateReport() {
               value={structureFormat}
               onChange={(e) => setStructureFormat(e.target.value)}
               />
+              {/* ================ Additional Description ================ */}
+              <h1 className='scroll-m-20 text-2xl font-semibold tracking-tight mb-1'>Additional Description</h1>
+              <h3 className='mb-3 text-neutral-400'>Any additional context or anything you would to focus the report / include in the report</h3>
+              <Textarea
+              placeholder='Include specific data points, focus areas, exclusions, or any other relevant information...'
+              className='mb-6'
+              value={additionalDescription}
+              onChange={(e) => setAdditionalDescription(e.target.value)}
+              />
               {/* ===================== End ======================== */}
               <div className='flex items-center gap-2 w-full justify-between'>
-                <Button onClick={initiateWorkflow} className='w-fit cursor-pointer' variant={''}>Generate Report</Button>
+                <Button onClick={initiateWorkflow} className='w-fit cursor-pointer' variant={'destructive'}>Generate Report</Button>
                 {reports.length > 0 && (
                   <Sheet>
                     <SheetTrigger asChild>
@@ -176,9 +206,12 @@ function CreateReport() {
                                   <DialogTitle></DialogTitle>
                                   <DialogDescription>
                                   </DialogDescription>
-                                  <ReactMarkdown className="prose prose-stone">
+                                  <Button className='mb-3' onClick={printAsPdf}>Download as PDF</Button>
+                                  <div ref={dialogRef}>
+                                    <ReactMarkdown className="prose">
                                       {report.report_generated}
                                     </ReactMarkdown>
+                                  </div>
                                 </DialogHeader>
                               </DialogContent>
                             </Dialog>
@@ -222,6 +255,7 @@ function CreateReport() {
                         setReportPurpose("");
                         setReportLength("");
                         setStructureFormat("");
+                        setAdditionalDescription("");
                         setWorkflowSteps([]);
                       }} variant={'outline'}>Click here to close the window once you're done</Button>
                     </div>
