@@ -89,6 +89,8 @@ Future research may focus on improving error-handling mechanisms, enhancing secu
   `
 
   return (
+    <div>
+      <h1>helo</h1>
     <Dialog>
       <DialogTrigger>Open</DialogTrigger>
       <DialogContent className='h-[50vh] overflow-scroll'>
@@ -102,14 +104,15 @@ Future research may focus on improving error-handling mechanisms, enhancing secu
             Download as PDF
           </Button>
 
-          <div ref={dialogRef}>
-            <ReactMarkdown className="prose">
+          <div ref={dialogRef} className="prose">
+            <ReactMarkdown>
               {markdownText}
             </ReactMarkdown>
           </div>
         </DialogHeader>
       </DialogContent>
     </Dialog>
+    </div>
   )
 }
 

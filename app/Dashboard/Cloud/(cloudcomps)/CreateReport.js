@@ -207,8 +207,8 @@ function CreateReport() {
                                   <DialogDescription>
                                   </DialogDescription>
                                   <Button className='mb-3' onClick={printAsPdf}>Download as PDF</Button>
-                                  <div ref={dialogRef}>
-                                    <ReactMarkdown className="prose">
+                                  <div ref={dialogRef} className="prose">
+                                    <ReactMarkdown>
                                       {report.report_generated}
                                     </ReactMarkdown>
                                   </div>

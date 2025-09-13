@@ -112,7 +112,7 @@ function GeneralChat(props) {
                               <div>
                                 <h1 className='p-2 px-5 border rounded-lg border-blue-900'>
                                   <ReactMarkdown>
-                                  {message.content}
+                                    {message.content}
                                   </ReactMarkdown>
                                 </h1>
                                 {(() => {
