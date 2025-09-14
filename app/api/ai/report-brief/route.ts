@@ -151,9 +151,6 @@ Your task is to take in the user's specifications for a report and produce a str
             
             Input provided:
             ${JSON.stringify(object)}
-
-            Refinement instructions provided by previous revisions of report generations:
-            ${refinement_instructions}
             `,
           });
           
@@ -264,6 +261,9 @@ ${result_context}
 
 ### OutlineObject
 ${JSON.stringify(object.Outline)}
+
+Refinement instructions provided by previous revisions of report generations of the same topic and report details:
+${refinement_instructions}
             `,
           });
 

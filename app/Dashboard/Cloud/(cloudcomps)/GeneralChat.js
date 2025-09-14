@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button';
-// import ReactMarkdown from 'react-markdown';
 import {
   Sheet,
   SheetContent,
@@ -10,7 +9,8 @@ import {
 } from "@/components/ui/sheet"
 import { Switch } from '@/components/ui/switch';
 import { Check, Circle, SendHorizonal } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react';
+import MarkdownComponent from "@/components/ui/MarkdownComponent"
 
 function GeneralChat(props) {
   const cloudData = props.data;
@@ -111,9 +111,7 @@ function GeneralChat(props) {
                               <h1 className='whitespace-nowrap'>AI said: </h1>
                               <div>
                                 <h1 className='p-2 px-5 border rounded-lg border-blue-900'>
-                                  {/* <ReactMarkdown> */}
-                                  {message.content}
-                                  {/* </ReactMarkdown> */}
+                                  <MarkdownComponent markdown={message.content} />
                                 </h1>
                                 {(() => {
                                   // Find the context index for this assistant message
@@ -122,7 +120,7 @@ function GeneralChat(props) {
                                   console.log("Chat this is the contexts: ", contextForThisMessage);
                                   
                                   return contextForThisMessage && contextForThisMessage.filter(item => item !== undefined).length > 0 && (
-                                    <h1 className='bg-neutral-900 w-fit p-2 px-4 rounded-lg mt-3 text-sm'>Souces: <span className='text-blue-400'>{contextForThisMessage.filter(item => item !== undefined).join(", ")}</span></h1>
+                                    <h1 className='bg-neutral-900 w-fit p-2 px-4 rounded-lg mt-3 text-sm'>Sources: <span className='text-blue-400'>{contextForThisMessage.filter(item => item !== undefined).join(", ")}</span></h1>
                                   );
                                 })()}
                               </div>

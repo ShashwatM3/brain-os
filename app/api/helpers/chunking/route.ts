@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     const text = body.text;
 
     const textSplitter = new RecursiveCharacterTextSplitter({
-      chunkSize: 750,
+      chunkSize: 500,
       chunkOverlap: 100,
     })
 

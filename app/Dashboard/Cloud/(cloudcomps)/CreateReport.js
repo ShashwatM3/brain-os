@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { CheckCheck, Download } from 'lucide-react';
 import { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
+import MarkdownComponent from '@/components/ui/MarkdownComponent';
 
 function CreateReport() {
   const [reportTopic, setReportTopic] = useState("");
@@ -24,6 +25,7 @@ function CreateReport() {
 
   const contentRef = useRef(null);
   const reactToPrintFn = useReactToPrint({ contentRef });
+
   function printAsPdf() {
     reactToPrintFn();
   }
@@ -106,7 +108,7 @@ function CreateReport() {
           <SheetTrigger asChild>
             <Button>Launch</Button>
           </SheetTrigger>
-          <SheetContent className='p-5 pt-10 min-w-[50vw]'>
+          <SheetContent className='p-5 pt-10 min-w-[50vw] overflow-scroll'>
             <SheetHeader>
               <SheetTitle>
                 <span id='grotesk-font' className='scroll-m-20 text-3xl font-bold tracking-tight text-balance'>Generate a Report</span>
@@ -172,28 +174,26 @@ function CreateReport() {
                         {reports.map((report, index) => (
                           <div key={index} className='border border-neutral-500 rounded-lg p-5'>
                             <div className='text-white'>
-                              <div><strong>Report Topic:</strong> {reportTopic}</div>
-                              <div><strong>Report Purpose:</strong> {reportPurpose}</div>
-                              <div><strong>Length and Depth:</strong> {reportLength}</div>
-                              <div><strong>Structure Format:</strong> {structureFormat}</div>
+                              <MarkdownComponent markdown={report.report_instructions} />
                             </div>
                             <div className='flex gap-2 mt-5 items-center justify-end'>
                               <Dialog>
                                 <DialogTrigger asChild>
                                   <Button>View Report</Button>
                                 </DialogTrigger>
-                                <DialogContent className='h-[65vh] overflow-scroll min-w-[65vw]'>
+                                <DialogContent className='h-[65vh] overflow-scroll min-w-[65vw] p-5'>
                                   <DialogHeader>
                                     <DialogTitle>Generated Report</DialogTitle>
                                     <DialogDescription>
                                       Preview of your generated report
                                     </DialogDescription>
-                                    <Button variant='outline' className='flex items-center gap-2'>
+                                    <Button onClick={printAsPdf} variant='outline' className='flex items-center gap-2 my-3'>
                                       <Download size={16} />
                                       Download Report
                                     </Button>
                                     <div 
                                       className='prose bg-black p-4 rounded' 
+                                      ref={contentRef}
                                       dangerouslySetInnerHTML={{ __html: report.report_generated }} 
                                     />
                                   </DialogHeader>

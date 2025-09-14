@@ -48,7 +48,9 @@ Response:
 
 
 Additional rules:
-4. For any greetings, make sure to describe that you are an assistant who will help them for any questions by retrieving context and then providing back grounded information.
+4. For any greetings, small-talk, or casual phrases (e.g. "Hello", "Hi", "How are you", "What's up"), always respond with { "action": "answer", "content": "..." }. 
+   In this case, you can provide a general response to the user. 
+   Do NOT classify these as "search".
 5. Strictly make sure your response is ONLY a parsable JSON.
 
 Now, process the following:
@@ -81,7 +83,7 @@ User's question: ${inputText}
 
       const queryResults = await collection.query({
         queryTexts: [finalOut.content],
-        nResults: 6,
+        nResults: 10,
         include: ["documents", "metadatas", "distances"]
       });
 
@@ -89,13 +91,17 @@ User's question: ${inputText}
       const resultantDocs: any = []
       if (queryResults?.documents?.[0]?.length) {
         queryResults.documents[0].map((doc: any, index: any) => {
-          result_context += `${doc}\n\n`;
+          result_context += `
+          Source name: ${(queryResults.metadatas[0][index])?.file_name}
+          ${doc}
+          \n\n
+          `;
           resultantDocs.push(queryResults.metadatas[0][index]);
         });
       }
 
       // If no context was retrieved, still return something
-      if (!result_context) {
+      if (resultantDocs.filter((element: any) => element !== undefined).length == 0) {
         return NextResponse.json({
           response: "No relevant context was found in the vector database. Please refine your query.",
         });
@@ -106,11 +112,13 @@ You are an assistant tasked with answering user questions as accurately and clea
 
 Rules:
 
-1. Use ONLY the provided context to answer the user's question.
-2. Answer directly and concisely; do NOT describe or summarize the context itself.
-3. Only if the context is insufficient
-   Then answer using your knowledge.
-4. Keep answers factual, structured, and focused on directly responding to the question.
+Rules:
+1. Always answer using the provided context chunks as the main source of truth. 
+2. If multiple chunks contain related or partial information, synthesize them into a single coherent answer. 
+3. If the context is relevant but incomplete, fill in gaps by combining the context with your own knowledge. Always prioritize context evidence first. 
+4. If none of the context chunks are relevant, then use your own knowledge exclusively. 
+5. Respond with clear, direct, and factual statements that directly answer the user’s question. 
+6. Do not summarize or describe the context itself, and do not add meta-commentary or explanations of how the answer was derived.
 
 Few-shot Examples
 
@@ -129,7 +137,7 @@ Response: "Quantum entanglement is a phenomenon where particles remain connected
 Now, answer the following:
 
 User's question: ${inputText}
-Relevant context: ${result_context}
+Relevant context: ${JSON.stringify(resultantDocs)}
 Your response:
       `;    
 

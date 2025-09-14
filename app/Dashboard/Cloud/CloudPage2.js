@@ -17,7 +17,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-// import ReactMarkdown from 'react-markdown';
 import { Switch } from '@/components/ui/switch';
 import { AuroraText } from '@/components/magicui/aurora-text';
 import ContentEditable from "react-contenteditable";
@@ -557,7 +556,7 @@ function CloudPage2() {
                           </SheetDescription>
                           <div className="min-h-screen text-[#e6e6e6] px-24 py-12 font-sans">
                             <div className="mb-6 flex justify-between items-center">
-                              <h1></h1>
+                              <h1 className='text-neutral-400 font-bold'>✨ New note</h1>
                               <Dialog>
                                 <DialogTrigger asChild>
                                   <Button
