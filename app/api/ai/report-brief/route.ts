@@ -95,12 +95,12 @@ Your task is to take in the user’s specifications for a report and produce a s
         // ----------------------------------------------------------------------
         // -----------------------Reflection Loop--------------------------------
         // ----------------------------------------------------------------------
-        send({ status: "update", message: "Starting refinment loop" });
+        send({ status: "update", message: "Starting refinement loop" });
 
         let iteration = 1;
         let refinement_instructions = ""
         let final_report = ""
-        let sources: any = []
+        const sources: any = []
 
         while (true) {
           // Generating the list of queries for Vector DB
