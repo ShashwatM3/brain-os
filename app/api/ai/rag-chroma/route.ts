@@ -128,7 +128,7 @@ Response: "Hamlet was likely written around 1601."
 
 User's question: "What is 2 + 2?"
 Context: "" (empty or irrelevant)
-Response: "The provided context does not fully answer the question, so I am using my own pre-trained knowledge. The answer is 4."
+Response: "The answer is 4."
 
 User's question: "What is quantum entanglement?"
 Context: "Quantum entanglement is a phenomenon where particles remain connected so that the state of one instantly influences the state of another."
@@ -137,7 +137,7 @@ Response: "Quantum entanglement is a phenomenon where particles remain connected
 Now, answer the following:
 
 User's question: ${inputText}
-Relevant context: ${JSON.stringify(resultantDocs)}
+Relevant context: ${result_context}
 Your response:
       `;    
 
@@ -148,7 +148,8 @@ Your response:
 
       return NextResponse.json({
         response: finalAnswer || "Could not generate an answer.",
-        documents: resultantDocs
+        documents: resultantDocs,
+        context: result_context
       });
 
     } catch (chromaError: any) {

@@ -52,7 +52,7 @@ function GeneralChat(props) {
         setUserInputOverall("");
         setMessages(prevMessages => ([
           ...prevMessages,
-          {"role": "assistant", "content": data.response},
+          {"role": "assistant", "content": data.response, "context": data.context || ""},
         ]))
         if (data.documents && data.documents.length>0) {
           const uniqueFileNames = [...new Set(data.documents.map(item => item.file_name))];
@@ -113,16 +113,22 @@ function GeneralChat(props) {
                                 <h1 className='p-2 px-5 border rounded-lg border-blue-900'>
                                   <MarkdownComponent markdown={message.content} />
                                 </h1>
-                                {(() => {
-                                  // Find the context index for this assistant message
-                                  const assistantMessageIndex = messages.slice(0, index + 1).filter(msg => msg.role === "assistant").length - 1;
-                                  const contextForThisMessage = contexts[assistantMessageIndex];
-                                  console.log("Chat this is the contexts: ", contextForThisMessage);
-                                  
-                                  return contextForThisMessage && contextForThisMessage.filter(item => item !== undefined).length > 0 && (
-                                    <h1 className='bg-neutral-900 w-fit p-2 px-4 rounded-lg mt-3 text-sm'>Sources: <span className='text-blue-400'>{contextForThisMessage.filter(item => item !== undefined).join(", ")}</span></h1>
-                                  );
-                                })()}
+                                {/* result_context */}
+                                <div className='flex items-center gap-2 mt-3'>
+                                  {(() => {
+                                    // Find the context index for this assistant message
+                                    const assistantMessageIndex = messages.slice(0, index + 1).filter(msg => msg.role === "assistant").length - 1;
+                                    const contextForThisMessage = contexts[assistantMessageIndex];
+                                    console.log("Chat this is the contexts: ", contextForThisMessage);
+                                    return contextForThisMessage && contextForThisMessage.filter(item => item !== undefined).length > 0 && (
+                                      <h1 className='bg-neutral-900 w-fit p-2 px-4 rounded-lg text-sm'>Sources: <span className='text-blue-400'>{contextForThisMessage.filter(item => item !== undefined).join(", ")}</span></h1>
+                                    );
+                                  })()}
+                                  {/* {message.context && (
+                                    <Button variant={'secondary'} onClick={() => {console.log(message.context)}}>View Context</Button>
+                                  )} */}
+                                  {/* <Button onClick={() => {console.log(message)}}>View Context</Button> */}
+                                </div>
                               </div>
                             </div>
                           )
