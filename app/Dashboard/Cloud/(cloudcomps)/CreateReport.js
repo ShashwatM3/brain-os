@@ -12,7 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { CheckCheck, Download } from 'lucide-react';
-import parse from 'html-react-parser';
+import { useRef } from "react";
+import { useReactToPrint } from "react-to-print";
 
 function CreateReport() {
   const [reportTopic, setReportTopic] = useState("");
@@ -20,6 +21,12 @@ function CreateReport() {
   const [reportLength, setReportLength] = useState("");
   const [structureFormat, setStructureFormat] = useState("");
   const [reports, setReports] = useState([]);
+
+  const contentRef = useRef(null);
+  const reactToPrintFn = useReactToPrint({ contentRef });
+  function printAsPdf() {
+    reactToPrintFn();
+  }
 
   const [workflowSteps, setWorkflowSteps] = useState([]);
   
@@ -181,17 +188,17 @@ function CreateReport() {
                                     <DialogDescription>
                                       Preview of your generated report
                                     </DialogDescription>
+                                    <Button variant='outline' className='flex items-center gap-2'>
+                                      <Download size={16} />
+                                      Download Report
+                                    </Button>
                                     <div 
-                                      className='bg-black p-4 rounded' 
+                                      className='prose bg-black p-4 rounded' 
                                       dangerouslySetInnerHTML={{ __html: report.report_generated }} 
                                     />
                                   </DialogHeader>
                                 </DialogContent>
                               </Dialog>
-                              {/* <Button variant='outline' className='flex items-center gap-2'>
-                                <Download size={16} />
-                                Download Report
-                              </Button> */}
                             </div>
                           </div>
                         ))}

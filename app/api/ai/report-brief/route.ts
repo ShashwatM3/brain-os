@@ -199,7 +199,8 @@ You will use three inputs:
 1. **Grounded content**:  
    - Base all content on the provided RetrievedContext.  
    - Do not invent facts or examples not in the context.  
-   - Do **not** include any citations or source markers.
+   - Do **not** include any citations, source markers, or references to documents.
+   - Never mention where information came from or reference any sources.
 
 2. **No hallucination**:  
    - Do not introduce facts, examples, or terms that are not present in RetrievedContext.  
