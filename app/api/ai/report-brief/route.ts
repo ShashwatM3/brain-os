@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
           }),
           prompt: `
 You are the Outline Agent for BrainOS.  
-Your task is to take in the user’s specifications for a report and produce a structured plan that includes:  
+Your task is to take in the user's specifications for a report and produce a structured plan that includes:  
 
 1. **Outline**: A detailed outline of the report, organized into sections and subsections.  
    - Each section must include a **1–2 line description** of what the section should contain.  
@@ -54,7 +54,7 @@ Your task is to take in the user’s specifications for a report and produce a s
 2. **Refinement Agent Instructions**: A checklist of specific, relevant criteria that the final report must satisfy.  
    - These act as checkpoints for the Reflection Agent to verify if the generated report meets requirements.  
    - Criteria should be practical and directly connected to the topic, purpose, and expected depth.  
-   - Example checkpoints: “Cite at least 3 recent studies,” “Include a comparative analysis,” “Provide an executive summary under 200 words.”  
+   - Example checkpoints: "Cite at least 3 recent studies," "Include a comparative analysis," "Provide an executive summary under 200 words."  
 
 ---
 
@@ -181,12 +181,12 @@ Your task is to take in the user’s specifications for a report and produce a s
             });
           }
 
-          // Generating the markdown report
-          const { text: markdownReport } = await generateText({
+          // Generating the HTML report
+          const { text: htmlReport } = await generateText({
             model: selectedModel,
             prompt: `
 Role: You are the Report Generation Agent in BrainOS.  
-Your job is to write a complete, polished report in **Markdown format** that is firmly grounded in the retrieved documents.  
+Your job is to write a complete, polished report in HTML format that is firmly grounded in the retrieved documents.  
 
 You will use three inputs:  
 1. **RetrievedContext** — a structured collection of document chunks from the vector database.  
@@ -207,7 +207,7 @@ You will use three inputs:
      > *No relevant information was found in the provided documents for this section.*  
 
 3. **Respect structure**:  
-   - Follow the OutlineObject exactly. Every section and subsection must appear as a Markdown heading.  
+   - Follow the OutlineObject exactly. Every section and subsection must appear as HTML headings.  
    - Content under each heading must align with the description provided in the outline.
 
 4. **Style & length**:  
@@ -216,10 +216,37 @@ You will use three inputs:
 
 ---
 
+### HTML Formatting Requirements
+- Do NOT include DOCTYPE, <html>, <head>, or <body> tags
+- Do NOT include any language indicators like \`\`\`html at the beginning
+- Start with a container div and output ONLY the HTML code itself
+- Use inline styles for formatting with proper margins and spacing
+- Since the HTML will be placed on a black background, ensure all text is white or light colored
+- Use proper HTML structure with headings (h1, h2, h3), paragraphs (p), and lists where appropriate
+- Ensure all tags are properly closed
+- Make it compatible with html-react-parser library
+- Avoid any event handling and stick to just formatting information into HTML code
+- Use professional styling with generous margins, padding, and line spacing for readability
+- Add proper spacing between sections, subsections, and paragraphs
+
+---
+
+### Spacing and Layout Requirements
+- Container div should have padding of at least 24px on all sides
+- Headings should have margin-bottom of 16px and margin-top of 24px (except first heading)
+- Paragraphs should have margin-bottom of 16px
+- Sections should be well-separated with generous spacing
+- Use line-height of at least 1.6 for better readability
+- Lists should have proper spacing between items
+
+---
+
 ### Output Format
-- Valid **Markdown** only.  
-- Each section and subsection should contain grounded content with citations.  
-- If a section has no coverage in RetrievedContext, state this transparently.  
+- Start immediately with the <div> container - no code block indicators
+- Each section and subsection should contain grounded content  
+- If a section has no coverage in RetrievedContext, state this transparently
+- All text should be white or light colored for visibility on black background
+- Output pure HTML code only, no markdown code blocks or language indicators
 
 ---
 
@@ -267,10 +294,10 @@ ${JSON.stringify(object.Outline)}
             model: selectedModel,
             schema: RefinementAgentSchema,
             prompt: `
-Role: You are the Refinement Agent in BrainOS. Your task is to evaluate a generated report against the provided outline, report details, and refinement instructions. You must decide whether the report is complete or requires further refinements.
+Role: You are the Refinement Agent in BrainOS. Your task is to evaluate a generated HTML report against the provided outline, report details, and refinement instructions. You must decide whether the report is complete or requires further refinements.
 
 Inputs:
-1. GeneratedReport — the full report produced by the Report Generation Agent.
+1. GeneratedReport — the full HTML report produced by the Report Generation Agent.
 2. OutlineObject — the structured outline of the report (sections, subsections, and descriptions).
 3. ReportDetails — user-provided details including topic, purpose, length/depth, and structure format.
 4. RefinementAgentInstructions — a list of checkpoints that the report must satisfy.
@@ -281,13 +308,14 @@ Instructions:
    - All sections and subsections from the OutlineObject are present and aligned with their descriptions.
    - The style, tone, and length match the ReportDetails.
    - Each checkpoint in the RefinementAgentInstructions is fully satisfied.
+   - The HTML formatting is correct and compatible with the requirements.
 3. If **all requirements are met**, set:
    - done = "YES"
    - refinements = "" (empty string)
 4. If **any requirements are not met**, set:
    - done = "NO"
    - refinements = a clear, actionable set of improvement instructions for the next report generation iteration.
-     - Instructions should be specific (e.g., “Executive Summary exceeds 200 words, shorten it,” “Add at least two recent sources,” “Clarify risks of bias in AI-generated content”).
+     - Instructions should be specific (e.g., "Executive Summary exceeds 200 words, shorten it," "Add at least two recent sources," "Clarify risks of bias in AI-generated content").
 5. Compare the GeneratedReport against the content in RetrievedContext.
 For each section and subsection:
   - If any important fact or example from RetrievedContext is missing, add it to refinements.
@@ -321,7 +349,7 @@ Output Format (JSON):
 ## Provided inputs
 
 ### GeneratedReport
-${markdownReport}
+${htmlReport}
 
 ### OutlineObject
 ${JSON.stringify(object.Outline)}
@@ -339,16 +367,16 @@ ${JSON.stringify(object.RefinementAgentInstructions)}
 
           send({ status: "update", message: `Feedback generated`});
 
-          final_report = markdownReport
+          final_report = htmlReport
 
           if (iteration >= 3) {
-            final_report = markdownReport; // Use the current report even if not perfect
+            final_report = htmlReport; // Use the current report even if not perfect
             break;
           } else if (refinement_agent_output.done == "NO") {
             iteration = iteration + 1;
             refinement_instructions = refinement_agent_output.refinements;
           } else {
-            final_report = markdownReport;
+            final_report = htmlReport;
             break;
           }
         }
@@ -359,13 +387,6 @@ ${JSON.stringify(object.RefinementAgentInstructions)}
           message: "All done!", 
           sources: sources 
         });
-
-        // Step 2: Graphical agent
-        // send({ status: "update", message: "Sent to Graphical Agent" });
-        // await new Promise((r) => setTimeout(r, 1000));
-
-        // Step 3: Final response
-        // send({ status: "done", result: "Here is the final AI-generated report ✅" });
 
         controller.close();
       },
