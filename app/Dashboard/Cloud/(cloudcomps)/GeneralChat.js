@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import ReactMarkdown from 'react-markdown';
+// import ReactMarkdown from 'react-markdown';
 import {
   Sheet,
   SheetContent,
@@ -111,9 +111,9 @@ function GeneralChat(props) {
                               <h1 className='whitespace-nowrap'>AI said: </h1>
                               <div>
                                 <h1 className='p-2 px-5 border rounded-lg border-blue-900'>
-                                  <ReactMarkdown>
+                                  {/* <ReactMarkdown> */}
                                   {message.content}
-                                  </ReactMarkdown>
+                                  {/* </ReactMarkdown> */}
                                 </h1>
                                 {(() => {
                                   // Find the context index for this assistant message

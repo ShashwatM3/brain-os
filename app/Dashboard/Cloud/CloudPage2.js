@@ -17,7 +17,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import ReactMarkdown from 'react-markdown';
+// import ReactMarkdown from 'react-markdown';
 import { Switch } from '@/components/ui/switch';
 import { AuroraText } from '@/components/magicui/aurora-text';
 import ContentEditable from "react-contenteditable";
@@ -667,9 +667,7 @@ function CloudPage2() {
                                 <div key={index} className='flex items-center gap-4'>
                                   <h1 className='whitespace-nowrap'>AI said: </h1>
                                   <h1 className='p-2 px-5 border rounded-lg border-blue-900'>
-                                    <ReactMarkdown>
                                     {message.content}
-                                    </ReactMarkdown>
                                   </h1>
                                 </div>
                               )
