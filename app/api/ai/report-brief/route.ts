@@ -171,12 +171,13 @@ Your task is to take in the user’s specifications for a report and produce a s
           let result_context = "";
           if (queryResults?.documents?.[0]?.length) {
             queryResults.documents[0].map((doc: any, index: any) => {
+              const metadata = queryResults.metadatas[0][index];
               result_context += `
-              Source: ${queryResults.metadatas[0][index].file_name || "Not given"}
+              Source: ${metadata?.file_name || "Not given"}
               Content:
               ${doc}\n\n
               `;
-              sources.push(queryResults.metadatas[0][index].file_name)
+              sources.push(metadata?.file_name || "Unknown");
             });
           }
 
