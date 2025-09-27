@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js';
 
 const elevenLabsClient = new ElevenLabsClient({
