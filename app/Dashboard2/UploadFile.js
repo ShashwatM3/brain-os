@@ -4,12 +4,15 @@ import { Plus } from 'lucide-react';
 import React, { useRef, useState } from 'react'
 import pdfToText from 'react-pdftotext';
 import { toast } from 'sonner';
+import { useCounterStore } from '../store';
 
 function UploadFile() {
   const hiddenFileInput = useRef(null);
   const [currentMediaDetails, setCurrentMediaDetails] = useState({});
   const [fileName, setFileName] = useState("");
   const [chunks, setChunks] = useState([]);
+  const user = useCounterStore((state) => state.user);
+  const setUser = useCounterStore((state) => state.setUser);
 
   async function extractText(file) {
     pdfToText(file)
@@ -80,7 +83,8 @@ function UploadFile() {
       body: JSON.stringify({
         ids: ids,
         documents: chunks,
-        filename: currentMediaDetails.name
+        filename: currentMediaDetails.name,
+        collection_name: user.uid
       }),
     });
   

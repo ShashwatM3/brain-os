@@ -44,7 +44,7 @@ function GeneralChat(props) {
         },
         body: JSON.stringify({
           inputText: userInputOverall,
-          collectionName: "myCollection",
+          collectionName: collection_name,
         }),
       });
       const data = await res.json();

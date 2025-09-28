@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
 
     const name = body.name;
     const description = body.description;
-
+    const collection_name = body.collection_name
     const ids = [`Cloud_${name}_DESCRIPTION`];
     const documents = [`Cloud: ${name}. Description: ${description}`];
 
@@ -20,8 +20,8 @@ export async function POST(req: NextRequest) {
     ]
 
     const collection = await client.getOrCreateCollection({
-      name: 'myCollection',
-      metadata: { 'description': `Collection for user: ${"myCollection"}` }
+      name: collection_name,
+      metadata: { 'description': `Collection for user: ${collection_name}` }
     });
 
     await collection.add({

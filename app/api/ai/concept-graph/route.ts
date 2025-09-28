@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
           // ---------------STEP 1: MOTIVATION + QUERIES-------------------
           // --------------------------------------------------------------
           
-          sendUpdate('progress', { step: 1, message: 'Generating motivation and queries...' });
+          sendUpdate('progress', { step: 1, message: 'Thinking about the topic...' });
 
           const prompt1 = `
           ### Your Goal & Purpose
@@ -40,9 +40,9 @@ export async function POST(req: NextRequest) {
           Your main task is to generate:
           1. The motivation behind creating the knowledge graph (focused on "${topic}").
           2. 3–5 concise, search-style semantic queries (not instructions) that would be directly sent to a vector database.  
-             - Queries must explicitly reference or strongly relate to "${topic}".  
-             - Queries should look like natural search questions or keyword-rich phrases (e.g., "core principles of Agentic Design Patterns"), 
-               NOT imperative instructions like "extract" or "identify."
+            - Queries must explicitly reference or strongly relate to "${topic}".  
+            - Queries should look like natural search questions or keyword-rich phrases (e.g., "core principles of Agentic Design Patterns"), 
+            NOT imperative instructions like "extract" or "identify."
           
           ### Your Output Format
           Your output must be strictly a Zod-parsable object in the format:
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
           // ---------------STEP 2: QUERYING VECTOR DB---------------------
           // --------------------------------------------------------------
 
-          sendUpdate('progress', { step: 2, message: 'Querying vector database...' });
+          sendUpdate('progress', { step: 2, message: 'Reading through your file...' });
 
           const collection = await client.getOrCreateCollection({
             name: collection_name
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
           sendUpdate('step_complete', { 
             step: 2, 
             data: { chunks_retrieved: results.documents.flat().length },
-            message: 'Vector database queried successfully!' 
+            message: 'Got relevant info from your file!' 
           });
 
           // --------------------------------------------------------------
@@ -236,7 +236,7 @@ Now generate the JSON graph for the given topic, queries, and chunks.
           // ------------STEP 4: LLM MERMAID GENERATION--------------------
           // --------------------------------------------------------------
 
-          sendUpdate('progress', { step: 4, message: 'Generating Mermaid visualization...' });
+          sendUpdate('progress', { step: 4, message: 'Generating graph visualization...' });
 
           const prompt3 = `
 You are an expert graph visualization generator. 
@@ -283,7 +283,7 @@ ${JSON.stringify(entities_extraction)}
           sendUpdate('step_complete', { 
             step: 4, 
             data: { mermaid_length: mermaid_syntax.length },
-            message: 'Mermaid visualization generated successfully!' 
+            message: 'Visualization generated successfully!' 
           });
 
           // --------------------------------------------------------------

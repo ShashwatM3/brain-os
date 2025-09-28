@@ -58,7 +58,7 @@ function ConceptGraph(props) {
           body: JSON.stringify({
             topic: graphTopic,
             file_name: selectedFile,
-            collection_name: "myCollection"
+            collection_name: collection_name
           }),
         });
   

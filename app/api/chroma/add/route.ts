@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
     const cloud_name = body.cloud_name
     const file_type = body.file_type
     const category = body.category
+    const collection_name = body.collection_name
 
     const ids = Array.from({ length: documents.length }, (_, i) => `cloud_${cloud_name}_${filename}_${i+1}`);
     const metadatas = Array.from({ length: documents.length }, () => (
@@ -24,8 +25,8 @@ export async function POST(req: NextRequest) {
       }));
 
     const collection = await client.getOrCreateCollection({
-      name: 'myCollection',
-      metadata: { 'description': `Collection for user: ${"myCollection"}` }
+      name: collection_name,
+      metadata: { 'description': `Collection for user: ${collection_name}` }
     });
 
     await collection.add({

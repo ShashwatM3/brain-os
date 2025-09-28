@@ -17,13 +17,14 @@ export default function Home() {
         <h1 className="brainos">BrainOS</h1>
         <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left mb-5">
           <li className="mb-2 tracking-[-.01em]">
-            Add
+            Store
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant={'ghost'} className="mx-2 text-red-400 cursor-pointer">information</Button>
+                <Button variant={'ghost'} className="mx-2 text-red-400 cursor-pointer">knowledge</Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Documents, YouTube vids, MP4 / MP3, Images, Live Record / Camera</p>
+                {/* <p>Documents, YouTube vids, MP4 / MP3, Images, Live Record / Camera</p> */}
+                <p>Documents, Notes</p>
               </TooltipContent>
             </Tooltip>
             to your{" "}
@@ -35,10 +36,10 @@ export default function Home() {
             Search across your brain 🧠
           </li>
         </ol>
-        <Button variant={'outline'} onClick={() => router.push("/Dashboard")}>Go to dashboard</Button>
+        <Button variant={'outline'} onClick={() => router.push("/Authentication")}>Your Dashboard</Button>
       </main>
       <div className="fixed bottom-10 right-10">
-        <h1 className="text-neutral-500 hover:text-neutral-300 transition-all cursor-pointer border-b hover:border-neutral-500 pb-1 text-sm">Contact the Founder</h1>
+        <h1 className="text-neutral-500 hover:text-neutral-300 transition-all cursor-pointer border-b hover:border-neutral-500 pb-1 text-sm">Contact</h1>
       </div>
       {/* <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a

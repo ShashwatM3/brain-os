@@ -51,7 +51,7 @@ function CreateReport() {
           report_length: reportLength,
           report_structure: structureFormat
         },
-        collection_name: "myCollection"
+        collection_name: collection_name
       }),
     });
 
