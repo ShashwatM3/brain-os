@@ -23,6 +23,8 @@ import ContentEditable from "react-contenteditable";
 import TurndownService from "turndown";
 import GeneralChat from './(cloudcomps)/GeneralChat';
 import CreateReport from "./(cloudcomps)/CreateReport"
+import HaveADiscussion from "./(cloudcomps)/HaveADiscussion"
+import ConceptGraph from "./(cloudcomps)/ConceptGraph"
 
 function CloudPage2() {
   // ------------------------------------------------------------------------
@@ -64,6 +66,7 @@ function CloudPage2() {
   const handleChange2 = (e) => {
     setHtml(e.target.value);
   };
+
   const handleSave = async () => {
     setLoading(true)
     setLoadingText("Retrieving your note content....")
@@ -121,10 +124,10 @@ function CloudPage2() {
   const tools = [
     { name: "General chat", icon: MessageCircleMore, component: GeneralChat },
     { name: "Create Reports", icon: BookText, component: CreateReport },
-    { name: "Have a Discussion", icon: Users, component: GeneralChat },
-    { name: "Concept Graph", icon: GitBranchPlusIcon, component: GeneralChat },
-    { name: "Podcast-it", icon: MicVocal, component: GeneralChat },
-    { name: "Create Workflows", icon: TrendingUpDown, component: GeneralChat },
+    // { name: "Have a Discussion", icon: Users, component: HaveADiscussion },
+    { name: "Concept Graph", icon: GitBranchPlusIcon, component: ConceptGraph },
+    // { name: "Podcast-it", icon: MicVocal, component: GeneralChat },
+    // { name: "Create Workflows", icon: TrendingUpDown, component: GeneralChat },
   ];
 
   function onBack() {
@@ -718,7 +721,7 @@ function CloudPage2() {
                 return (
                   <div className='min-w-[20vw] h-[20vh] flex items-start justify-between flex-col py-7 px-6 border' key={index}>
                     <h1 className='scroll-m-20 text-2xl font-semibold tracking-tight flex items-center gap-2' id="grotesk-font">
-                      <IconComponent size={24} />
+                      <IconComponent data={data} size={24} />
                       {tool.name}
                     </h1>
                     <div className='flex items-center justify-between w-full'>
