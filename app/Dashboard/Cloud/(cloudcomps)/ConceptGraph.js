@@ -358,7 +358,7 @@ function ConceptGraph(props) {
     try {
       console.log('Starting text-to-speech...');
       
-      setStatusVoiceover("Making the AI understand your graph....")
+      setStatusVoiceover("Making the AI understand the graph....")
       
       // Call your API route instead of using the client directly
       const response = await fetch('/api/tts', {
@@ -494,14 +494,27 @@ function ConceptGraph(props) {
                       <div className='bg-white overflow-scroll'>
                         <Mermaid className='h-[80vh] overflow-scroll' chart={finalResult.mermaid_syntax}/>
                       </div><br/>
-                      <div className='flex items-center gap-3'>
-                        <Button className='w-fit' onClick={() => speak(finalResult.voiceover)}><Mic className='inline'/><span>Narrative Voiceover</span></Button>
-                        {statusVoiceover.length>0 && (
-                          <h1 id="" className='flex items-center gap-2'>
-                            <div className='h-9 w-9 rounded-full bg-green-500'></div>
-                            <span id='fadeInOut'>{statusVoiceover}</span>
-                          </h1>
-                        )}
+                      <div className='flex items-center justify-between'>
+                        <div className='flex items-center gap-3'>
+                          <Button className='w-fit' onClick={() => speak(finalResult.voiceover)}><Mic className='inline'/><span>Narrative Voiceover</span></Button>
+                          {statusVoiceover.length>0 && (
+                            <h1 id="" className='flex items-center gap-2'>
+                              <div className='h-5 w-5 rounded-full bg-green-500'></div>
+                              <span id='fadeInOut'>{statusVoiceover}</span>
+                            </h1>
+                          )}
+                        </div>
+                        <Button onClick={() => {
+                          setForm(false)
+                          setSelectedFile("");
+                          setGraphTopic("");
+                          setIsGenerating(false);
+                          setCurrentStep(0);
+                          setStepMessage("");
+                          setFinalResult(null);
+                          setVoiceover("");
+                          setStatusVoiceover("");
+                        }} variant={'destructive'}>Back to Dashboard</Button>
                       </div>
                       <h1 className='mt-3 text-neutral-400'>{finalResult.voiceover}</h1>
                     </DialogHeader>
