@@ -41,6 +41,8 @@ function CloudPage2() {
   const setCurrentCloud = useCounterStore((state) => state.setCurrentCloud); // Setter function for the above
   const currentCloudName = useCounterStore((state) => state.currentCloudName) // Gets the current name of the cloud form state. SET WHEN ENTERING CLOUD
   const setCurrentCloudName = useCounterStore((state) => state.setCurrentCloudName); // Setter function for the above
+  const user = useCounterStore((state) => state.user);
+  const setUser = useCounterStore((state) => state.setUser);
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState("");
   // ------------------------------------------------------------------------
@@ -85,7 +87,8 @@ function CloudPage2() {
           filename: noteTitle,
           cloud_name: name,
           file_type: "document",
-          category: "Notes"
+          category: "Notes",
+          collection_name: user.uid
         }),
       });
     
@@ -163,6 +166,7 @@ function CloudPage2() {
         },
         body: JSON.stringify({
           cloud_name: cloud_name,
+          collection_name: user.uid
         }),
       });
     
@@ -292,7 +296,8 @@ function CloudPage2() {
             filename: fileName,
             cloud_name: name,
             file_type: currentMediaDetails.fileType,
-            category: "Media"
+            category: "Media",
+            collection_name: user.uid
           }),
         });
       
@@ -355,7 +360,7 @@ function CloudPage2() {
           metadata_object: {
             file_name: fileName,
           },
-          collection_name: "myCollection",
+          collection_name: collection_name,
         }),
       });
     

@@ -10,10 +10,11 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     const cloud_name = body.cloud_name;
+    const collection_name = body.collection_name;
 
     const collection = await client.getOrCreateCollection({
-      name: 'myCollection',
-      metadata: { 'description': `Collection for user: ${"myCollection"}` }
+      name: collection_name,
+      metadata: { 'description': `Collection for user: ${collection_name}` }
     });
 
     const resp = await collection.query({

@@ -9,10 +9,13 @@ export async function POST(req: NextRequest) {
   try {
     // Ensure client initializes with env; helpful error if missing
     getChromaClient();
+
+    const body = await req.json();
+    const collection_name = body.collection_name;
     
     const collection = await client.getOrCreateCollection({
-      name: 'myCollection',
-      metadata: { 'description': `Collection for user: ${"myCollection"}` }
+      name: collection_name,
+      metadata: { 'description': `Collection for user: ${collection_name}` }
     });
 
     const allDocuments = await collection.get({
