@@ -20,8 +20,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import Mermaid from '@/components/ui/Mermaid';
-import { ElevenLabsClient, play } from '@elevenlabs/elevenlabs-js';
-import elevenLabsClient from '@/lib/elevenlabs';
 
 function ConceptGraph(props) {
   const [loading, setLoading] = useState("");
@@ -276,7 +274,6 @@ function ConceptGraph(props) {
     }
   }
   
-  // Alternative using Web Audio API for better compatibility
   async function playAudioInBrowserWebAudio(audioData) {
     try {
       console.log('Using Web Audio API...');
@@ -356,60 +353,43 @@ function ConceptGraph(props) {
     }
   }
   
-  // Enhanced speakSample function
   async function speak(text) {
     setStatusVoiceover("Loading in an AI Narrater....")
     try {
       console.log('Starting text-to-speech...');
       
-      const audioData = await elevenLabsClient.textToSpeech.convert('JBFqnCBsd6RMkjVDRZzb', {
-        text: text,
-        modelId: 'eleven_multilingual_v2',
-        outputFormat: 'mp3_44100_128',
-      });
-  
       setStatusVoiceover("Making the AI understand your graph....")
       
-      // Try the main method first
-      try {
-        setStatusVoiceover("Speaking...")
-        setVoiceover(text)
-        await playAudioInBrowser(audioData);
-        setStatusVoiceover("");
-      } catch (htmlAudioError) {
-        console.log('HTML Audio failed, trying Web Audio API...', htmlAudioError);
-        
-        // If HTML audio fails, try Web Audio API
-        try {
-          setVoiceover(text)
-          await playAudioInBrowserWebAudio(audioData);
-          toast.success('Audio played successfully with Web Audio API!');
-        } catch (webAudioError) {
-          console.error('Both audio methods failed:', { htmlAudioError, webAudioError });
-          toast.error('Failed to play audio with both methods');
-        }
+      // Call your API route instead of using the client directly
+      const response = await fetch('/api/tts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: text,
+          voiceId: 'JBFqnCBsd6RMkjVDRZzb'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate audio');
       }
+
+      // Get the audio data as an ArrayBuffer
+      const audioData = await response.arrayBuffer();
+      
+      setStatusVoiceover("Speaking...")
+      setVoiceover(text)
+      
+      // Use your existing playAudioInBrowser function
+      await playAudioInBrowser(audioData);
+      setStatusVoiceover("");
       
     } catch (error) {
       console.error('Error with text-to-speech:', error);
       toast.error('Failed to generate or play audio');
-    }
-  }
-
-  async function speakOut() {
-    if (finalResult) {
-      try {
-        const audioData = await elevenLabsClient.textToSpeech.convert('JBFqnCBsd6RMkjVDRZzb', {
-          text: finalResult.voiceover,
-          modelId: 'eleven_multilingual_v2',
-          outputFormat: 'mp3_44100_128',
-        });
-        
-        await playAudioInBrowser(audioData);
-      } catch (error) {
-        console.error('Error with text-to-speech:', error);
-        toast.error('Failed to play voiceover');
-      }
+      setStatusVoiceover("");
     }
   }
 
@@ -427,6 +407,7 @@ function ConceptGraph(props) {
             </SheetTitle>
             <SheetDescription>
             </SheetDescription>
+            {/* <Button onClick={() => speak("Hello there. I am your beautiful AI Assistant. Let's talk about AI Agents yeah?")}>Yo</Button> */}
             <h3 className='bg-neutral-800 text-red-400 px-3 py-1 text-lg font-bold font-mono pl-4 rounded-xl my-4 w-fit'>How it works</h3>
             <h3 className={`text-lg mb-4 ${form ? "text-neutral-500" : ""}`}>
               This tool allows you to convert any of your knowledge sources into a navigable graph of entities where EACH ENTITY represents a bit of information.<br/><br/> <b>Additionally, you can use an AI to help you along the way.</b> 
@@ -505,7 +486,7 @@ function ConceptGraph(props) {
                   <DialogTrigger asChild>
                     <Button className='hidden'></Button>
                   </DialogTrigger>
-                  <DialogContent className='h-[80vh] min-w-[80vw] p-7'>
+                  <DialogContent className='h-[90vh] min-w-[80vw] p-7 overflow-scroll'>
                     <DialogHeader>
                       <DialogTitle></DialogTitle>
                       <DialogDescription>
