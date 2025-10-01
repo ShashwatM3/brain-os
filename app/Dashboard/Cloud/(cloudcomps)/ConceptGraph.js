@@ -20,6 +20,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import Mermaid from '@/components/ui/Mermaid';
+import { useCounterStore } from '@/app/store';
 
 function ConceptGraph(props) {
   const [loading, setLoading] = useState("");
@@ -33,6 +34,10 @@ function ConceptGraph(props) {
   const [finalResult, setFinalResult] = useState(null); 
   const [voiceover, setVoiceover] = useState("");
   const [statusVoiceover, setStatusVoiceover] = useState("");
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  const user = useCounterStore((state) => state.user);
+  const setUser = useCounterStore((state) => state.setUser);
   
   const steps = [
     'Generating queries',
@@ -58,7 +63,7 @@ function ConceptGraph(props) {
           body: JSON.stringify({
             topic: graphTopic,
             file_name: selectedFile,
-            collection_name: collection_name
+            collection_name: user.uid
           }),
         });
   
@@ -378,9 +383,9 @@ function ConceptGraph(props) {
 
       // Get the audio data as an ArrayBuffer
       const audioData = await response.arrayBuffer();
-      
       setStatusVoiceover("Speaking...")
       setVoiceover(text)
+      setIsSpeaking(true)
       
       // Use your existing playAudioInBrowser function
       await playAudioInBrowser(audioData);
@@ -516,7 +521,7 @@ function ConceptGraph(props) {
                           setStatusVoiceover("");
                         }} variant={'destructive'}>Back to Dashboard</Button>
                       </div>
-                      <h1 className='mt-3 text-neutral-400'>{finalResult.voiceover}</h1>
+                      <h1 className={`mt-3 text-neutral-400 ${isSpeaking ? "" : "hidden"}`}>{finalResult.voiceover}</h1>
                     </DialogHeader>
                   </DialogContent>
                 </Dialog>

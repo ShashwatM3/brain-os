@@ -17,6 +17,7 @@ import { Brain, Cloud, Delete, Edit, Link, RefreshCcw, Trash } from 'lucide-reac
 import CloudPage from "./Cloud/CloudPage"
 import { useCounterStore } from "../store"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 
 function DashboardPage() {
   // Creating clouds
@@ -162,8 +163,15 @@ function DashboardPage() {
       </div>
     ) : (
       <div className='dashboard-page-main p-5 pt-10'>
-        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance mb-3">Welcome to your &nbsp;<span id="grotesk-font" className="">Dashboard</span></h1>
-        <h3 className="mb-7">Here, you can view your clouds, edit them, and access them for further intelligent interactions</h3>
+        <div className="flex items-center justify-between">
+          <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance mb-3"><span id="grotesk-font" className="">Your Dashboard</span></h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl">{user.name}</h1>
+            <Image src={user.profile_pic} alt="" height={50} width={50} className="rounded-full"/>
+          </div>
+        </div>
+        <br/>
+        <h3 className="mb-5">Here, you can view your clouds, edit them, and access them for further intelligent interactions</h3>
         
         {/* Clouds Form Button */}
         {createCloud ? (

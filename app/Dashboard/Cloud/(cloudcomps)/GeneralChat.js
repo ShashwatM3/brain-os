@@ -7,13 +7,26 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Switch } from '@/components/ui/switch';
 import { Check, Circle, SendHorizonal } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import MarkdownComponent from "@/components/ui/MarkdownComponent"
+import { doc, setDoc, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { toast } from 'sonner';
+import { useCounterStore } from '@/app/store';
 
 function GeneralChat(props) {
   const cloudData = props.data;
+  const user = useCounterStore((state) => state.user);
   const name = props.cloudName
   const setBlur = props.setBlur;
 
@@ -25,6 +38,22 @@ function GeneralChat(props) {
   const [contexts, setContexts] = useState([]);
 
   const [loadingResponse, setLoadingResponse] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  function closeOpenSheet() {
+    if (!sheetOpen) {
+      setBlur(true);
+      setSheetOpen(true);
+    } else {
+      if (messages.length >= 2) {
+        setDialogOpen(true);
+      } else {
+        setSheetOpen(false);
+        setBlur(false);
+      }
+    }
+  }
   
   useEffect(() => {
     if (!textareaRef.current) return;
@@ -44,7 +73,7 @@ function GeneralChat(props) {
         },
         body: JSON.stringify({
           inputText: userInputOverall,
-          collectionName: collection_name,
+          collectionName: user.uid,
         }),
       });
       const data = await res.json();
@@ -69,10 +98,30 @@ function GeneralChat(props) {
     }
   }
 
+  async function saveChat() {
+    setLoading(true);
+    toast.info("Saving your info...")
+    const d = new Date();
+    let dateOnlyString = d.toISOString();    
+    try {
+      const docRef = doc(db, "users", user.uid, "cloud_chats", dateOnlyString)
+      await setDoc(docRef, {
+        messages: JSON.stringify(messages),
+        contexts: JSON.stringify(contexts)
+      })
+      toast.success("Chat info saved successfully :)")
+      setBlur(false);
+                  setDialogOpen(false);
+                  setSheetOpen(false);
+    } catch(err) {
+      console.error("Error with updating details: ", err)
+    }
+  }
+
   return (
     <div className='h-full w-full bg-transparent'>
       <div className='flex items-center gap-2'>
-        <Sheet onOpenChange={setBlur}>
+        <Sheet open={sheetOpen} onOpenChange={closeOpenSheet}>
           <SheetTrigger asChild>
             <Button>Launch</Button>
           </SheetTrigger>
@@ -168,6 +217,26 @@ function GeneralChat(props) {
             </SheetHeader>
           </SheetContent>
         </Sheet>
+
+        <Dialog open={dialogOpen}>
+          <DialogTrigger className='hidden'>Open</DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Do you want to save this chat for later?</DialogTitle>
+              <DialogDescription>
+                You can access this chat and it's context anytime later
+              </DialogDescription>
+              <div className='flex items-center my-3 gap-2'>
+                <Button onClick={saveChat}>Yes</Button>
+                <Button onClick={() => {
+                  setBlur(false);
+                  setDialogOpen(false);
+                  setSheetOpen(false);
+                }}>No</Button>
+              </div>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
 
         <Button variant={'outline'}>More Info</Button>
       </div>
