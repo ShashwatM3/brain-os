@@ -1,4 +1,4 @@
-// For creating a collection
+// For fetching data from cloud
 
 import client from '@/lib/chroma';
 import { NextRequest, NextResponse } from 'next/server';
