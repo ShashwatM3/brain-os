@@ -64,12 +64,12 @@ BrainOS is your second brain—a platform for storing knowledge and extracting i
    ```env
    # OpenAI
    OPENAI_API_KEY=your_openai_key
-   OPENAI_ORG_ID=your_org_id  # optional
 
    # ChromaDB
    CHROMA_API_KEY=your_chroma_key
    CHROMA_TENANT=your_tenant
    CHROMA_DATABASE=your_database
+   CHROMA_SERVER_CORS_ALLOW_ORIGINS='["*"]' # adjust as needed
 
    # ElevenLabs
    ELEVENLABS_API_KEY=your_elevenlabs_key
