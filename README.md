@@ -144,7 +144,11 @@ lib/
 | `/api/ai/report-brief` | Streaming report generation |
 | `/api/ai/concept-graph` | Entity extraction & Mermaid generation |
 | `/api/chroma/add` | Add documents to collection |
-| `/api/chroma/fetch-cloud-data` | Retrieve cloud contents |
+| `/api/chroma/create` | Creating a collection |
+| `/api/chroma/delete` | Deleting certain information from collection |
+| `/api/chroma/fetch-clouds-only` | For getting cloud names |
+| `/api/chroma/fetch-cloud-data` | For fetching data from cloud |
+| `/api/helpers/chunking` | Chunking of information (For RAG) Via LangChain |
 | `/api/tts` | Text-to-speech conversion |
 
 ## Troubleshooting
