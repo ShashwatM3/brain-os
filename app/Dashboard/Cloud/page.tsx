@@ -1,12 +1,11 @@
 import React from 'react'
-import CloudPage from './CloudPage'
-import CloudPage2 from './CloudPage2'
+import CloudPage from "./CloudPage"
 
 function Page() {
   return (
     <div>
       {/* <CloudPage/> */}
-      <CloudPage2/>
+      <CloudPage/>
     </div>
   )
 }
