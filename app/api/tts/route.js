@@ -48,10 +48,17 @@ export async function POST(request) {
     });
     
   } catch (error) {
-    console.error('TTS API Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to generate audio' }, 
-      { status: 500 }
-    );
+    if ((JSON.stringify(error)).includes("quota_exceeded")) {
+      return NextResponse.json(
+        {"error": "Credit limit reached"}
+      )
+    } else {
+      console.error('TTS API Error:', error);
+      return NextResponse.json(
+        { error: 'Failed to generate audio' }, 
+        { status: 500 }
+      );
+    }
+
   }
 }

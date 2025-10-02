@@ -231,7 +231,7 @@ function CreateReport() {
                   {reports.length > 0 && (
                     <Sheet>
                       <SheetTrigger asChild>
-                        <Button className='w-fit cursor-pointer bg-blue-900 hover:bg-blue-700 text-white'>All Generated Reports</Button>
+                        <Button className='w-fit cursor-pointer bg-blue-900 hover:bg-blue-700 text-white'>Previously Generated Reports</Button>
                       </SheetTrigger>
                       <SheetContent className='min-w-[40vw] p-5'>
                         <SheetHeader>
@@ -240,14 +240,14 @@ function CreateReport() {
                             View all your previously generated reports and their details below
                           </SheetDescription>
                           {reports.map((report, index) => (
-                            <div key={index} className='border border-neutral-500 rounded-lg p-5'>
+                            <div key={index} className='border border-neutral-800 rounded-lg p-5 mb-4'>
                               <div className='text-white'>
                                 <MarkdownComponent markdown={report.report_instructions} />
                               </div>
-                              <div className='flex gap-2 mt-5 items-center justify-end'>
+                              <div className='flex gap-2 mt-2 items-center justify-end'>
                                 <Dialog>
                                   <DialogTrigger asChild>
-                                    <Button>View Report</Button>
+                                    <Button variant={'outline'}>View Report</Button>
                                   </DialogTrigger>
                                   <DialogContent className='h-[65vh] overflow-scroll min-w-[65vw] p-5'>
                                     <DialogHeader>

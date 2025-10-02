@@ -1,4 +1,13 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import {
   Sheet,
   SheetContent,
@@ -8,7 +17,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { Button } from '@/components/ui/button';
-import { GitBranchPlusIcon, GitGraph, LucideNetwork, Mic } from 'lucide-react';
+import { Copy, GitBranch, GitBranchPlusIcon, GitGraph, LucideGitGraph, LucideNetwork, Mic } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import {
@@ -21,6 +30,8 @@ import {
 } from "@/components/ui/dialog"
 import Mermaid from '@/components/ui/Mermaid';
 import { useCounterStore } from '@/app/store';
+import { collection, doc, getDocs, setDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 function ConceptGraph(props) {
   const [loading, setLoading] = useState("");
@@ -38,6 +49,8 @@ function ConceptGraph(props) {
 
   const user = useCounterStore((state) => state.user);
   const setUser = useCounterStore((state) => state.setUser);
+  
+  const [graphs, setGraphs] = useState([]);
   
   const steps = [
     'Generating queries',
@@ -94,7 +107,7 @@ function ConceptGraph(props) {
           for (const line of lines) {
             if (line.startsWith('data: ')) {
               try {
-                const jsonStr = line.slice(6); // Remove 'data: ' prefix
+                const jsonStr = line.slice(6);
                 if (jsonStr.trim() === '') continue;
                 
                 const update = JSON.parse(jsonStr);
@@ -115,6 +128,23 @@ function ConceptGraph(props) {
                     
                   case 'complete':
                     console.log('Generation completed:', update.data);
+
+                    const d = new Date();
+                    let dateOnlyString = d.toISOString();    
+                    try {
+                      const docRef = doc(db, "users", user.uid, "cloud_concept_graphs", dateOnlyString)
+                      await setDoc(docRef, {
+                        mermaid: update.data.mermaid_syntax,
+                        voiceover: update.data.voiceover,
+                        date: dateOnlyString,
+                        title: graphTopic
+                      })
+                      toast.success("Concept graph info saved successfully :)")
+                    } catch(err) {
+                      toast.error("Error with updating concept graph details");
+                      console.error("Error with updating details: ", err);
+                    }
+
                     setFinalResult(update.data);
                     setStepMessage('Knowledge graph generation completed!');
                     break;
@@ -261,6 +291,7 @@ function ConceptGraph(props) {
           console.log('Audio playback completed');
           cleanup();
           URL.revokeObjectURL(audioUrl);
+          setIsSpeaking(false)
           resolve();
         };
   
@@ -279,85 +310,6 @@ function ConceptGraph(props) {
     }
   }
   
-  async function playAudioInBrowserWebAudio(audioData) {
-    try {
-      console.log('Using Web Audio API...');
-      
-      let audioBuffer;
-      
-      // Handle ReadableStream
-      if (audioData instanceof ReadableStream) {
-        console.log('Processing ReadableStream with Web Audio API...');
-        
-        const reader = audioData.getReader();
-        const chunks = [];
-        let totalLength = 0;
-        
-        try {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            
-            chunks.push(value);
-            totalLength += value.length;
-          }
-        } finally {
-          reader.releaseLock();
-        }
-        
-        // Combine all chunks
-        const combinedArray = new Uint8Array(totalLength);
-        let offset = 0;
-        for (const chunk of chunks) {
-          combinedArray.set(chunk, offset);
-          offset += chunk.length;
-        }
-        
-        audioBuffer = combinedArray.buffer;
-      } else if (audioData instanceof ArrayBuffer) {
-        audioBuffer = audioData;
-      } else if (audioData instanceof Uint8Array) {
-        audioBuffer = audioData.buffer;
-      } else {
-        throw new Error('Unsupported format for Web Audio API');
-      }
-  
-      // Use Web Audio API
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      
-      // Resume context if it's suspended (required by some browsers)
-      if (audioContext.state === 'suspended') {
-        await audioContext.resume();
-      }
-      
-      // Decode audio data
-      const decodedAudio = await audioContext.decodeAudioData(audioBuffer.slice());
-      
-      // Create and play audio
-      const source = audioContext.createBufferSource();
-      source.buffer = decodedAudio;
-      source.connect(audioContext.destination);
-      
-      return new Promise((resolve, reject) => {
-        source.onended = () => {
-          console.log('Web Audio playback completed');
-          resolve();
-        };
-        
-        try {
-          source.start();
-          console.log('Web Audio playback started');
-        } catch (error) {
-          reject(error);
-        }
-      });
-      
-    } catch (error) {
-      console.error('Web Audio API error:', error);
-      throw error;
-    }
-  }
-  
   async function speak(text) {
     setStatusVoiceover("Loading in an AI Narrater....")
     try {
@@ -365,7 +317,6 @@ function ConceptGraph(props) {
       
       setStatusVoiceover("Making the AI understand the graph....")
       
-      // Call your API route instead of using the client directly
       const response = await fetch('/api/tts', {
         method: 'POST',
         headers: {
@@ -377,6 +328,11 @@ function ConceptGraph(props) {
         }),
       });
 
+      if (response.error == "Credit limit reached") {
+        toast.info("Not enough credits remaining (i'm broke) :(")
+        return;
+      }
+
       if (!response.ok) {
         throw new Error('Failed to generate audio');
       }
@@ -387,8 +343,8 @@ function ConceptGraph(props) {
       setVoiceover(text)
       setIsSpeaking(true)
       
-      // Use your existing playAudioInBrowser function
       await playAudioInBrowser(audioData);
+      setIsSpeaking(false);
       setStatusVoiceover("");
       
     } catch (error) {
@@ -397,6 +353,29 @@ function ConceptGraph(props) {
       setStatusVoiceover("");
     }
   }
+
+  async function getGraphsData() {
+    try {
+      const querySnapshot = await getDocs(collection(db, "users", user.uid, "cloud_concept_graphs"));
+      querySnapshot.forEach((doc) => {
+        setGraphs(prev => [...prev, doc.data()])
+      });
+      setLoading(false);
+    } catch(err) {
+      console.error(err);
+      router.push("/Dashboard");
+    }
+  }
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      setLoading(true);
+      if (user) {
+        await getGraphsData();
+      }
+    };
+    fetchReports();
+  }, [user])
 
   return (
     <div className='flex items-center gap-2'>
@@ -412,14 +391,66 @@ function ConceptGraph(props) {
             </SheetTitle>
             <SheetDescription>
             </SheetDescription>
-            {/* <Button onClick={() => speak("Hello there. I am your beautiful AI Assistant. Let's talk about AI Agents yeah?")}>Yo</Button> */}
             <h3 className='bg-neutral-800 text-red-400 px-3 py-1 text-lg font-bold font-mono pl-4 rounded-xl my-4 w-fit'>How it works</h3>
             <h3 className={`text-lg mb-4 ${form ? "text-neutral-500" : ""}`}>
               This tool allows you to convert any of your knowledge sources into a navigable graph of entities where EACH ENTITY represents a bit of information.<br/><br/> <b>Additionally, you can use an AI to help you along the way.</b> 
             </h3>
-
             {!form ? (
-              <Button onClick={() => setForm(true)} className='w-fit' variant={'outline'}>Launch form</Button>
+              <div className='flex items-center gap-3'>
+                <Button onClick={() => setForm(true)} className='w-fit' variant={'outline'}>Launch form</Button>
+                {graphs.length > 0 && (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant={'destructive'}>Previously generated graphs</Button>
+                    </DialogTrigger>
+                    <DialogContent className='min-w-[50vw] max-h-[40vh] overflow-scroll'>
+                      <DialogHeader>
+                        <DialogTitle className='mb-3'>Previously generated graphs</DialogTitle>
+                        <DialogDescription>
+                        </DialogDescription>
+                        <div className='flex items-center justify-center flex-col gap-4 w-full'>
+                          {graphs.map((graph) => (
+                            <Card key={graph.mermaid} className='bg-transparent border-neutral-800 w-full'>
+                              <CardHeader>
+                                {console.log(graph)}
+                                <CardTitle>{graph.title}</CardTitle>
+                                <CardAction>
+                                  <h1>{new Date(graph.date).toDateString()}</h1>
+                                </CardAction>
+                              </CardHeader>
+                              <CardContent>
+                                <div className='flex items-center gap-2'>
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <Button variant={'outline'}><GitBranch/>Show graph</Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                      <DialogHeader>
+                                        <DialogTitle></DialogTitle>
+                                        <DialogDescription>
+                                        </DialogDescription>
+                                        <div className='bg-white overflow-scroll'>
+                                          <Mermaid className='h-[80vh] overflow-scroll' chart={graph.mermaid}/>
+                                        </div>
+                                      </DialogHeader>
+                                    </DialogContent>
+                                  </Dialog>
+                                  {/* <Button variant={'outline'}> <Mic/>Speak Voiceover</Button> */}
+                                  <Button onClick={async () => {
+                                    await navigator.clipboard.writeText(graph.voiceover);
+                                    toast.info("Voiceover copied to clipboard")
+                                  }} variant={'outline'}><Copy/>Copy Voiceover</Button>
+                                </div>
+                              
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </DialogHeader>
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </div>
             ):(
             <>
               <div className='mt-2 border-t border-neutral-700 pt-10'>
@@ -467,7 +498,7 @@ function ConceptGraph(props) {
                   
                   {isGenerating && (
                     <div className="space-y-2">
-                      <p className="text-sm text-gray-600">{stepMessage}</p>
+                      <p className="text-sm text-gray-300 mb-2">{stepMessage}</p>
                       <div className="flex space-x-1">
                         {steps.map((step, index) => (
                           <div

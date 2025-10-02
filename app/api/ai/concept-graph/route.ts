@@ -6,8 +6,17 @@ import { openai } from "@ai-sdk/openai";
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import client from "@/lib/chroma";
+import mermaid from 'mermaid';
 
 export const dynamic = "force-dynamic";
+
+async function generateMermaidSyntax(prompt: string, model: any) {
+  const { text: mermaid_syntax } = await generateText({
+    model: model,
+    prompt: prompt,
+  });
+  return mermaid_syntax
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -241,46 +250,79 @@ Now generate the JSON graph for the given topic, queries, and chunks.
           sendUpdate('progress', { step: 4, message: 'Generating graph visualization...' });
 
           const prompt3 = `
-You are an expert graph visualization generator. 
-
-You are in the final stage of a knowledge graph pipeline: 
-the concept graph of a document for a given topic has already been extracted as JSON (nodes, edges, and sections). 
-Your task is to convert this JSON into a **Mermaid graph string** that can be directly rendered in a Mermaid viewer.
-
-### Purpose:
-The goal is to create a **clear, structured, readable concept map**:
-- Show relationships between entities and concepts.
-- Group related nodes under sections (subgraphs) based on the original JSON.
-- Make it easy for a user to understand the document's main ideas and their connections.
-
-### Instructions:
-1. Use Mermaid 'graph TD' format.
-2. Create one main root node if possible, representing the topic.
-3. Group nodes into **subgraphs** based on their "section" field from the JSON.
-   - Use 'subgraph SectionName' ... 'end'.
-4. Each node should display its 'id':
-   - By default, use square brackets: [NodeID].
-   - Use rounded edges (NodeID) only for high-level concepts if desired.
-5. For each edge:
-   - Use 'NodeA -->|relation| NodeB'.
-   - Keep relation labels concise (max 3 words).
-6. Do **not** include any explanations, extra text, or code fencing.
-7. Output **ONLY** the Mermaid graph string.
-
----
-
-### Input JSON:
-${JSON.stringify(entities_extraction)}
-
----
-
-### Output (Mermaid string):
+          You are an expert graph visualization generator.
+          
+          You are in the final stage of a knowledge graph pipeline:
+          the concept graph of a document for a given topic has already been extracted as JSON (nodes, edges, and sections).
+          Your task is to convert this JSON into a **Mermaid graph string** that can be directly rendered in a Mermaid viewer.
+          
+          ### Purpose:
+          Create a **clear, structured, readable concept map**:
+          - Show relationships between entities and concepts.
+          - Group related nodes under sections (subgraphs) based on the original JSON.
+          - Make it easy for a user to understand the document's main ideas and their connections.
+          
+          ### CRITICAL Mermaid Syntax Rules:
+          1. Always start with \`graph TD\` on its own line
+          2. **Node IDs must be simple alphanumeric with underscores ONLY** (no spaces, no special chars)
+          3. **Node definitions use this format**: \`NodeID[Display Text]\`
+          4. **Edges use this format**: \`NodeID1 -->|label| NodeID2\`
+          5. **All nodes must be defined before being used in edges**
+          6. Subgraphs use: \`subgraph SubgraphID["Display Name"]\` ... \`end\`
+          7. Replace ALL spaces in IDs with underscores
+          8. Keep edge labels short (max 2-3 words)
+          
+          ### Correct Format Example:
+          \`\`\`
+          graph TD
+              MainTopic[Main Topic]
+              Concept1[First Concept]
+              Concept2[Second Concept]
+              
+              subgraph Section1["First Section"]
+                  Node1[Node One]
+                  Node2[Node Two]
+                  Node1 -->|relates_to| Node2
+              end
+              
+              MainTopic -->|leads_to| Concept1
+              Concept1 -->|connects_to| Node1
+          \`\`\`
+          
+          ### WRONG Examples (DO NOT DO THIS):
+          ❌ \`graph TD[Main_Topic] --> [Agent]\` (can't define node inline with edge)
+          ❌ \`Node With Spaces[Label]\` (spaces in node ID)
+          ❌ \`Node1 --> Node2\` without defining nodes first
+          
+          ### Instructions:
+          1. First, list ALL nodes with their definitions
+          2. Then, add subgraphs with their nodes
+          3. Finally, add all edges
+          4. Use consistent naming: convert all node IDs to snake_case
+          5. Output ONLY the Mermaid string, no explanations, no code fences
+          
+          ### Input JSON:
+          ${JSON.stringify(entities_extraction)}
+          
+          ### Output:
+          (Mermaid graph string starting with 'graph TD')
           `;
 
-          const { text: mermaid_syntax } = await generateText({
-            model: selectedModel,
-            prompt: prompt3,
-          });
+          let mermaid_syntax = ""
+          let counter = 0
+          while (true) {
+            if (counter==3) {
+              break
+            }
+            const syntax = await generateMermaidSyntax(prompt3, selectedModel)
+            try {
+              mermaid.parse(syntax);
+              mermaid_syntax = syntax
+              break
+            } catch(err) {
+              counter+=1
+            }
+          }
 
           sendUpdate('step_complete', { 
             step: 4, 
